@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="?android:attr/selectableItemBackground"
+    android:clickable="true"
+    android:focusable="true"
+    android:padding="12dp">
+    <!-- O "selectableItemBackground" cria aquele efeito de "onda" (ripple) ao clicar na música -->
+
+    <!-- Número da Faixa -->
+    <TextView
+        android:id="@+id/textTrackNumber"
+        android:layout_width="32dp"
+        android:layout_height="wrap_content"
+        android:textAlignment="center"
+        android:textColor="#B3B3B3"
+        android:textSize="16sp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:text="1" />
+
+    <!-- Nome da Faixa -->
+    <TextView
+        android:id="@+id/textTrackName"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:ellipsize="end"
+        android:maxLines="1"
+        android:textColor="#FFFFFF"
+        android:textSize="16sp"
+        app:layout_constraintEnd_toStartOf="@+id/textTrackDuration"
+        app:layout_constraintStart_toEndOf="@+id/textTrackNumber"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:text="Global Warming (feat. Sensato)" />
+
+    <!-- Nome do Artista (aparece abaixo do nome da faixa) -->
+    <TextView
+        android:id="@+id/textTrackArtist"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="2dp"
+        android:ellipsize="end"
+        android:maxLines="1"
+        android:textColor="#B3B3B3"
+        android:textSize="14sp"
+        app:layout_constraintEnd_toEndOf="@+id/textTrackName"
+        app:layout_constraintStart_toStartOf="@+id/textTrackName"
+        app:layout_constraintTop_toBottomOf="@+id/textTrackName"
+        tools:text="Pitbull" />
+
+    <!-- Duração da Faixa -->
+    <TextView
+        android:id="@+id/textTrackDuration"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="#B3B3B3"
+        android:textSize="14sp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:text="1:25" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
