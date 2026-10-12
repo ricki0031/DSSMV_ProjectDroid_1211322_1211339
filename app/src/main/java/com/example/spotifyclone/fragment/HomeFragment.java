@@ -1,5 +1,6 @@
 package com.example.spotifyclone.fragment;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -46,7 +47,7 @@ public class HomeFragment extends Fragment {
 
         if (getArguments() != null) {
             accessToken = getArguments().getString("ACCESS_TOKEN");
-            // Agora fazemos apenas UM pedido e alimentamos as duas listas!
+            // Fazer o pedido à API para alimentar as duas listas
             fetchActivityAndDistribute(accessToken);
         }
 
@@ -90,7 +91,7 @@ public class HomeFragment extends Fragment {
                                     // Enchemos a grelha primeiro (até ter 8 itens no total)
                                     if (gridItems.size() < 8) {
                                         RecentGridAdapter.GridItem trackItem = new RecentGridAdapter.GridItem();
-                                        trackItem.title = currentAlbum.name; // Usamos o nome do álbum em vez da faixa!
+                                        trackItem.title = currentAlbum.name;
                                         trackItem.id = currentAlbum.id;
                                         trackItem.isLikedSongs = false;
 
@@ -107,13 +108,37 @@ public class HomeFragment extends Fragment {
                             }
                         }
 
-                        // Atualizar a UI com as duas listas separadas
+                        // Atualizar a UI com as duas listas e os respetivos Listeners de cliques
                         getActivity().runOnUiThread(() -> {
-                            RecentGridAdapter gridAdapter = new RecentGridAdapter(gridItems);
+
+                            // Adaptador da Grelha 2x4
+                            RecentGridAdapter gridAdapter = new RecentGridAdapter(gridItems, new RecentGridAdapter.OnItemClickListener() {
+                                @Override
+                                public void onItemClick(RecentGridAdapter.GridItem item) {
+                                    if (item.isLikedSongs) {
+                                        System.out.println("CLIQUE NAS LIKED SONGS -> A desenvolver futuramente");
+                                    } else {
+                                        Intent intent = new Intent(getActivity(), com.example.spotifyclone.AlbumActivity.class);
+                                        intent.putExtra("ACCESS_TOKEN", accessToken);
+                                        intent.putExtra("ALBUM_ID", item.id);
+                                        startActivity(intent);
+                                    }
+                                }
+                            });
                             recyclerViewGrid.setAdapter(gridAdapter);
 
-                            HorizontalCardAdapter horizontalAdapter = new HorizontalCardAdapter(jumpBackInAlbums);
+                            // Adaptador da Lista Horizontal (Jump back in)
+                            HorizontalCardAdapter horizontalAdapter = new HorizontalCardAdapter(jumpBackInAlbums, new HorizontalCardAdapter.OnItemClickListener() {
+                                @Override
+                                public void onItemClick(Album album) {
+                                    Intent intent = new Intent(getActivity(), com.example.spotifyclone.AlbumActivity.class);
+                                    intent.putExtra("ACCESS_TOKEN", accessToken);
+                                    intent.putExtra("ALBUM_ID", album.id);
+                                    startActivity(intent);
+                                }
+                            });
                             recyclerViewJumpBackIn.setAdapter(horizontalAdapter);
+
                         });
 
                     } catch (Exception e) {

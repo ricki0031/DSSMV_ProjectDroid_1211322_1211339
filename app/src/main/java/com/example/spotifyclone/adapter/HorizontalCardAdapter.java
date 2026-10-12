@@ -14,10 +14,15 @@ import java.util.List;
 
 public class HorizontalCardAdapter extends RecyclerView.Adapter<HorizontalCardAdapter.ViewHolder> {
 
+    public interface OnItemClickListener {
+        void onItemClick(Album album);
+    }
     private List<Album> items;
+    private OnItemClickListener listener;
 
-    public HorizontalCardAdapter(List<Album> items) {
+    public HorizontalCardAdapter(List<Album> items,OnItemClickListener listener) {
         this.items = items;
+        this.listener = listener;
     }
 
     @NonNull
@@ -43,8 +48,9 @@ public class HorizontalCardAdapter extends RecyclerView.Adapter<HorizontalCardAd
         }
 
         holder.itemView.setOnClickListener(v -> {
-            System.out.println("CLICASTE NO ITEM HORIZONTAL: " + album.name);
-            // Futuramente passamos o Intent para abrir o AlbumActivity
+            if (listener != null) {
+                listener.onItemClick(album);
+            }
         });
     }
 

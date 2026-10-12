@@ -21,10 +21,15 @@ public class RecentGridAdapter extends RecyclerView.Adapter<RecentGridAdapter.Vi
         public String id; // Para no futuro sabermos o que tocar
     }
 
-    private List<GridItem> items;
+    public interface OnItemClickListener {
+        void onItemClick(GridItem item);
+    }
 
-    public RecentGridAdapter(List<GridItem> items) {
+    private List<GridItem> items;
+    private OnItemClickListener listener; // 2. Variável para guardar o listener
+    public RecentGridAdapter(List<GridItem> items, OnItemClickListener listener) {
         this.items = items;
+        this.listener = listener;
     }
 
     @NonNull
@@ -50,13 +55,12 @@ public class RecentGridAdapter extends RecyclerView.Adapter<RecentGridAdapter.Vi
                     .into(holder.image);
         }
 
-        holder.itemView.setOnClickListener(v -> {
-            if (item.isLikedSongs) {
-                System.out.println("CLICASTE NAS LIKED SONGS!");
-                // No futuro abre o ecrã das liked songs
-            } else {
-                System.out.println("CLICASTE NO RECENTE: " + item.title);
-                // No futuro manda tocar esta música
+        holder.itemView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (listener != null) {
+                    listener.onItemClick(item);
+                }
             }
         });
     }

@@ -15,7 +15,6 @@
         android:layout_height="match_parent"
         android:orientation="horizontal"
         android:background="?android:attr/selectableItemBackground"
-        android:clickable="true"
         android:focusable="true">
 
         <ImageView
