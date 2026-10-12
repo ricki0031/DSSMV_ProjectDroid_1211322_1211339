@@ -19,7 +19,7 @@ public class AlbumApiClient {
         client.newCall(request).enqueue(callback);
     }
 
-    /*
+
     // Pede os álbuns mais recentes (New Releases)
     public static void getNewReleases(String accessToken, Callback callback) {
         Request request = new Request.Builder()
@@ -29,7 +29,7 @@ public class AlbumApiClient {
                 .build();
 
         client.newCall(request).enqueue(callback);
-    }*/
+    }
 
     // Pede os álbuns guardados ("Gostos") da biblioteca do utilizador
     public static void getUserSavedAlbums(String accessToken, Callback callback) {

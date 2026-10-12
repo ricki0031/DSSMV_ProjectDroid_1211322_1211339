@@ -20,6 +20,8 @@ import com.example.spotifyclone.api.SpotifyAuthClient;
 import com.example.spotifyclone.model.TokenResponse;
 import com.example.spotifyclone.utils.PKCEUtil;
 import com.example.spotifyclone.fragment.LibraryFragment;
+import com.example.spotifyclone.fragment.HomeFragment;
+import com.example.spotifyclone.fragment.SearchFragment;
 
 
 
@@ -54,7 +56,7 @@ public class MainActivity extends AppCompatActivity {
 
         // 3. Definir as permissões (scopes) que a tua app precisa.
         // Para controlar o player, pesquisar e ver álbuns/artistas guardados.
-        String scopes = "user-modify-playback-state user-read-playback-state user-read-currently-playing user-library-read user-library-modify";
+        String scopes = "user-modify-playback-state user-read-playback-state user-read-currently-playing user-library-read user-library-modify user-read-recently-played";
 
         // 4. Construir o URL de autorização de forma segura usando o Uri.Builder
         Uri uri = Uri.parse("https://accounts.spotify.com/authorize")
@@ -163,14 +165,22 @@ public class MainActivity extends AppCompatActivity {
 
             int itemId = item.getItemId();
             if (itemId == R.id.nav_home) {
-                // selectedFragment = new HomeFragment(); // Criarás isto no futuro
-                System.out.println("HOME CLICADO");
+                selectedFragment = new HomeFragment();
+                // Passar o token para a Home
+                Bundle args = new Bundle();
+                args.putString("ACCESS_TOKEN", accessToken);
+                selectedFragment.setArguments(args);
+
             } else if (itemId == R.id.nav_search) {
-                // selectedFragment = new SearchFragment(); // Criarás isto no futuro
-                System.out.println("SEARCH CLICADO");
+                selectedFragment = new SearchFragment();
+                // Passar o token para a Search
+                Bundle args = new Bundle();
+                args.putString("ACCESS_TOKEN", accessToken);
+                selectedFragment.setArguments(args);
+
             } else if (itemId == R.id.nav_library) {
                 selectedFragment = new LibraryFragment();
-                // Passar o token para o Fragment
+                // Passar o token para a Library
                 Bundle args = new Bundle();
                 args.putString("ACCESS_TOKEN", accessToken);
                 selectedFragment.setArguments(args);
@@ -184,8 +194,8 @@ public class MainActivity extends AppCompatActivity {
             return true;
         });
 
-        // Simula um clique na Library para carregar os álbuns logo no arranque (opcional)
-        bottomNav.setSelectedItemId(R.id.nav_library);
+        // Agora simulamos o clique na Home logo após o login para carregar a página principal!
+        bottomNav.setSelectedItemId(R.id.nav_home);
     }
 }
     /*
