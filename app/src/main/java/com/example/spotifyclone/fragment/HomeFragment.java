@@ -1,6 +1,5 @@
 package com.example.spotifyclone.fragment;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -47,7 +46,6 @@ public class HomeFragment extends Fragment {
 
         if (getArguments() != null) {
             accessToken = getArguments().getString("ACCESS_TOKEN");
-            // Fazer o pedido à API para alimentar as duas listas
             fetchActivityAndDistribute(accessToken);
         }
 
@@ -55,7 +53,7 @@ public class HomeFragment extends Fragment {
     }
 
     private void fetchActivityAndDistribute(String token) {
-        PlayerApiClient.getRecentlyPlayed(token, new Callback() {
+        PlayerApiClient.getRecentlyPlayedTracks(token, new Callback() {
             @Override
             public void onFailure(@NonNull Call call, @NonNull IOException e) {
                 System.out.println("ERRO REDE RECENTES: " + e.getMessage());
@@ -72,7 +70,7 @@ public class HomeFragment extends Fragment {
 
                         List<RecentGridAdapter.GridItem> gridItems = new ArrayList<>();
                         List<Album> jumpBackInAlbums = new ArrayList<>();
-                        Set<String> processedAlbumIds = new HashSet<>(); // Para evitar capas repetidas
+                        Set<String> processedAlbumIds = new HashSet<>();
 
                         // 1. O botão estático Liked Songs sempre em 1º
                         RecentGridAdapter.GridItem likedSongs = new RecentGridAdapter.GridItem();
@@ -84,11 +82,9 @@ public class HomeFragment extends Fragment {
                             for (RecentlyPlayedResponse.PlayHistoryObject item : recentResponse.items) {
                                 Album currentAlbum = item.track.album;
 
-                                // Se a música tem álbum e ainda não o processámos
                                 if (currentAlbum != null && currentAlbum.id != null && !processedAlbumIds.contains(currentAlbum.id)) {
                                     processedAlbumIds.add(currentAlbum.id);
 
-                                    // Enchemos a grelha primeiro (até ter 8 itens no total)
                                     if (gridItems.size() < 8) {
                                         RecentGridAdapter.GridItem trackItem = new RecentGridAdapter.GridItem();
                                         trackItem.title = currentAlbum.name;
@@ -99,42 +95,33 @@ public class HomeFragment extends Fragment {
                                             trackItem.imageUrl = currentAlbum.images.get(0).url;
                                         }
                                         gridItems.add(trackItem);
-                                    }
-                                    // Quando a grelha estiver cheia, mandamos os restantes para o Jump Back In (até 10)
-                                    else if (jumpBackInAlbums.size() < 10) {
+                                    } else if (jumpBackInAlbums.size() < 10) {
                                         jumpBackInAlbums.add(currentAlbum);
                                     }
                                 }
                             }
                         }
 
-                        // Atualizar a UI com as duas listas e os respetivos Listeners de cliques
                         getActivity().runOnUiThread(() -> {
 
-                            // Adaptador da Grelha 2x4
                             RecentGridAdapter gridAdapter = new RecentGridAdapter(gridItems, new RecentGridAdapter.OnItemClickListener() {
                                 @Override
                                 public void onItemClick(RecentGridAdapter.GridItem item) {
                                     if (item.isLikedSongs) {
                                         System.out.println("CLIQUE NAS LIKED SONGS -> A desenvolver futuramente");
                                     } else {
-                                        Intent intent = new Intent(getActivity(), com.example.spotifyclone.AlbumActivity.class);
-                                        intent.putExtra("ACCESS_TOKEN", accessToken);
-                                        intent.putExtra("ALBUM_ID", item.id);
-                                        startActivity(intent);
+                                        // Usamos o FragmentManager em vez do Intent
+                                        openAlbumFragment(item.id);
                                     }
                                 }
                             });
                             recyclerViewGrid.setAdapter(gridAdapter);
 
-                            // Adaptador da Lista Horizontal (Jump back in)
                             HorizontalCardAdapter horizontalAdapter = new HorizontalCardAdapter(jumpBackInAlbums, new HorizontalCardAdapter.OnItemClickListener() {
                                 @Override
                                 public void onItemClick(Album album) {
-                                    Intent intent = new Intent(getActivity(), com.example.spotifyclone.AlbumActivity.class);
-                                    intent.putExtra("ACCESS_TOKEN", accessToken);
-                                    intent.putExtra("ALBUM_ID", album.id);
-                                    startActivity(intent);
+                                    // Usamos o FragmentManager em vez do Intent
+                                    openAlbumFragment(album.id);
                                 }
                             });
                             recyclerViewJumpBackIn.setAdapter(horizontalAdapter);
@@ -149,5 +136,22 @@ public class HomeFragment extends Fragment {
                 }
             }
         });
+    }
+
+    // Método centralizado para gerir a transição para o detalhe do álbum
+    private void openAlbumFragment(String albumId) {
+        Bundle args = new Bundle();
+        args.putString("ACCESS_TOKEN", accessToken);
+        args.putString("ALBUM_ID", albumId);
+
+        AlbumFragment albumFragment = new AlbumFragment();
+        albumFragment.setArguments(args);
+
+        if (getActivity() != null) {
+            getActivity().getSupportFragmentManager().beginTransaction()
+                    .replace(R.id.fragment_container, albumFragment)
+                    .addToBackStack(null) // Adiciona à pilha para o botão "Voltar" funcionar
+                    .commit();
+        }
     }
 }

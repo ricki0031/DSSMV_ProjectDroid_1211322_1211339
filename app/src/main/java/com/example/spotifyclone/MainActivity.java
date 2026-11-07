@@ -4,11 +4,20 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
+import android.widget.LinearLayout;
 import androidx.fragment.app.Fragment;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.bumptech.glide.Glide;
+import androidx.recyclerview.widget.LinearLayoutManager;
+
+
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.annotation.NonNull;
+
+
+import android.widget.ImageView;
+import android.widget.TextView;
 
 import java.io.IOException;
 
@@ -17,12 +26,15 @@ import okhttp3.Callback;
 import okhttp3.Response;
 
 import com.example.spotifyclone.api.SpotifyAuthClient;
+import com.example.spotifyclone.api.PlayerApiClient;
 import com.example.spotifyclone.model.TokenResponse;
+import com.example.spotifyclone.model.CurrentlyPlayingResponse;
+import com.example.spotifyclone.model.Device;
+import com.example.spotifyclone.model.DevicesResponse;
 import com.example.spotifyclone.utils.PKCEUtil;
 import com.example.spotifyclone.fragment.LibraryFragment;
 import com.example.spotifyclone.fragment.HomeFragment;
 import com.example.spotifyclone.fragment.SearchFragment;
-
 
 
 public class MainActivity extends AppCompatActivity {
@@ -32,10 +44,25 @@ public class MainActivity extends AppCompatActivity {
     public static final String CODE_VERIFIER_KEY = "code_verifier";
 
 
+    private TextView miniPlayerTitle, miniPlayerArtist;
+    private ImageView miniPlayerPlayPause, miniPlayerCover;
+
+    private LinearLayout miniPlayerButton;
+
+    private boolean isPlaying = false;
+    private String currentTrackId = ""; // Guarda o ID da música atual
+    private String globalAccessToken;
+
+    public String globalDeviceId = "";
+
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        setupMiniPlayerControls();
 
         if (getIntent().getData() == null) {
             authenticateWithSpotify();
@@ -137,10 +164,15 @@ public class MainActivity extends AppCompatActivity {
 
                                 System.out.println("TOKENS GUARDADOS COM SUCESSO!");
 
+                                globalAccessToken = tokenResponse.getAccessToken();
+
+                                fetchActiveDevice(globalAccessToken);
+
                                 runOnUiThread(new Runnable() {
                                     @Override
                                     public void run() {
-                                        setupBottomNavigation(tokenResponse.getAccessToken());
+                                        setupBottomNavigation(globalAccessToken);
+                                        syncMiniPlayer(globalAccessToken);
                                     }
                                 });
 
@@ -155,6 +187,36 @@ public class MainActivity extends AppCompatActivity {
         } else {
             System.out.println("Erro: code_verifier não encontrado nas SharedPreferences.");
         }
+    }
+
+    public void fetchActiveDevice(String token) {
+        PlayerApiClient.getAvailableDevices(token, new Callback() {
+            @Override
+            public void onFailure(@NonNull Call call, @NonNull IOException e) {}
+
+            @Override
+            public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
+                if (response.isSuccessful() && response.body() != null) {
+                    String json = response.body().string();
+                    try {
+                        com.google.gson.Gson gson = new com.google.gson.Gson();
+                        DevicesResponse devicesResponse = gson.fromJson(json, DevicesResponse.class);
+
+                        if (devicesResponse != null && devicesResponse.devices != null) {
+                            for (Device device : devicesResponse.devices) {
+                                if (device.isActive || "Smartphone".equalsIgnoreCase(device.type)) {
+                                    globalDeviceId = device.id;
+                                    System.out.println("DISPOSITIVO DETETADO: " + globalDeviceId);
+                                    break;
+                                }
+                            }
+                        }
+                    } catch (Exception e) {
+                        System.out.println("ERRO GSON (Dispositivos): " + e.getMessage());
+                    }
+                }
+            }
+        });
     }
 
     private void setupBottomNavigation(String accessToken) {
@@ -197,58 +259,129 @@ public class MainActivity extends AppCompatActivity {
         // Agora simulamos o clique na Home logo após o login para carregar a página principal!
         bottomNav.setSelectedItemId(R.id.nav_home);
     }
-}
-    /*
-    private void fetchNewReleases(String accessToken) {
-        AlbumApiClient.getNewReleases(accessToken, new Callback() {
+
+    public void syncMiniPlayer(String accessToken) {
+        this.globalAccessToken = accessToken;
+
+        PlayerApiClient.getCurrentlyPlayingTrack(accessToken, new Callback() {
             @Override
             public void onFailure(@NonNull Call call, @NonNull IOException e) {
-                System.out.println("ERRO DE REDE: Falha ao carregar novos lançamentos. " + e.getMessage());
+                System.out.println("ERRO: Falha ao obter estado do Mini-Player.");
             }
 
             @Override
             public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
-                // Lemos a resposta IMEDIATAMENTE e imprimimos no Logcat para ver o que o Spotify enviou
-                String json = response.body().string();
-                System.out.println("RESPOSTA SPOTIFY: " + json);
+                if (response.isSuccessful() && response.body() != null) {
+                    String json = response.body().string();
 
-                if (response.isSuccessful()) {
+                    // Se o JSON estiver vazio (código 204), não há nada a tocar
+                    if (json.isEmpty()) {
+                        runOnUiThread(() -> {
+                            // Podes esconder o Mini-Player aqui se quiseres
+                            System.out.println("Nenhuma música a tocar no momento.");
+                        });
+                        return;
+                    }
+
                     try {
                         com.google.gson.Gson gson = new com.google.gson.Gson();
-                        NewReleasesResponse releases = gson.fromJson(json, NewReleasesResponse.class);
+                        // Aqui o Gson usa o teu novo modelo!
+                        CurrentlyPlayingResponse current = gson.fromJson(json, CurrentlyPlayingResponse.class);
 
-                        System.out.println("TESTE GRELHA: JSON convertido! Álbuns recebidos: " + releases.albums.items.size());
+                        if (current != null && current.item != null) {
+                            isPlaying = current.isPlaying;
+                            currentTrackId = current.item.id;
 
-                        // Atualizar a UI na Thread Principal
-                        runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                if (releases.albums != null && releases.albums.items != null) {
-                                    AlbumAdapter adapter = new AlbumAdapter(releases.albums.items, new AlbumAdapter.OnItemClickListener() {
-                                        @Override
-                                        public void onItemClick(Album album) {
-                                            Intent intent = new Intent(MainActivity.this, AlbumActivity.class);
-                                            intent.putExtra("ACCESS_TOKEN", accessToken);
-                                            intent.putExtra("ALBUM_ID", album.id);
-                                            startActivity(intent);
-                                        }
-                                    });
-                                    recyclerViewGrid.setAdapter(adapter);
-                                    System.out.println("TESTE GRELHA: Adapter associado à RecyclerView com sucesso!");
-                                } else {
-                                    System.out.println("TESTE GRELHA: Os itens dos álbuns estão a null!");
+                            // Atualizar a UI tem de ser no runOnUiThread
+                            runOnUiThread(() -> {
+                                // 1. Atualizar Título e Artista
+                                miniPlayerTitle.setText(current.item.name);
+                                if (current.item.artists != null && !current.item.artists.isEmpty()) {
+                                    miniPlayerArtist.setText(current.item.artists.get(0).name);
                                 }
-                            }
-                        });
+
+                                // 2. Atualizar Ícone de Play/Pause
+                                if (isPlaying) {
+                                    miniPlayerPlayPause.setImageResource(android.R.drawable.ic_media_pause);
+                                } else {
+                                    miniPlayerPlayPause.setImageResource(android.R.drawable.ic_media_play);
+                                }
+
+                                // 3. Carregar a Capa (reaproveitando a lógica da classe Track/Album)
+                                if (current.item.album != null && current.item.album.images != null && !current.item.album.images.isEmpty()) {
+                                    Glide.with(MainActivity.this)
+                                            .load(current.item.album.images.get(0).url)
+                                            .into(miniPlayerCover);
+                                }
+                            });
+                        }
                     } catch (Exception e) {
-                        System.out.println("ERRO GSON (O JSON não bate certo com o nosso Modelo): " + e.getMessage());
+                        System.out.println("ERRO GSON no Mini-Player: " + e.getMessage());
                     }
-                } else {
-                    System.out.println("ERRO API SPOTIFY: Código " + response.code());
                 }
             }
         });
-    }*/
+    }
+    private void setupMiniPlayerControls() {
+        // Substitui pelos IDs reais do teu ficheiro XML
+        miniPlayerTitle = findViewById(R.id.miniPlayerTitle);
+        miniPlayerArtist = findViewById(R.id.miniPlayerArtist);
+        miniPlayerPlayPause = findViewById(R.id.miniPlayerPlayPause);
+        miniPlayerCover = findViewById(R.id.miniPlayerImage); // Caso tenhas a imagem da capa
+        miniPlayerButton = findViewById(R.id.mini_player); // Se tiveres um botão para abrir o player completo
+
+        miniPlayerPlayPause.setOnClickListener(v -> {
+            if (globalAccessToken == null) return;
+
+            if (isPlaying) {
+                // Se está a tocar, chama o Endpoint para Pausar
+                PlayerApiClient.pausePlayback(globalAccessToken, new Callback() {
+                    @Override
+                    public void onFailure(@NonNull Call call, @NonNull IOException e) {}
+
+                    @Override
+                    public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
+                        if (response.isSuccessful()) {
+                            isPlaying = false;
+                            runOnUiThread(() -> miniPlayerPlayPause.setImageResource(android.R.drawable.ic_media_play));
+                        }
+                    }
+                });
+            } else {
+                // Se está pausado, chama o Endpoint para Retomar (Play)
+                // Passamos "null" ou vazio caso o teu método suporte retomar sem especificar a faixa
+                PlayerApiClient.startResumePlayback(globalAccessToken, null, globalDeviceId, new Callback() {
+                    @Override
+                    public void onFailure(@NonNull Call call, @NonNull IOException e) {}
+
+                    @Override
+                    public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
+                        if (response.isSuccessful()) {
+                            isPlaying = true;
+                            runOnUiThread(() -> miniPlayerPlayPause.setImageResource(android.R.drawable.ic_media_pause));
+                        }
+                    }
+                });
+            }
+        });
+
+        miniPlayerButton.setOnClickListener(v -> {
+            if (globalAccessToken == null) return;
+            Intent PlayerIntent = new Intent(this, PlayerActivity.class);
+            PlayerIntent.putExtra("ACCESS_TOKEN", globalAccessToken);
+            startActivity(PlayerIntent);
+        });
+    }
+
+    // 3. Adiciona o onResume para atualizar a música sempre que voltares à app!
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (globalAccessToken != null) {
+            syncMiniPlayer(globalAccessToken);
+        }
+    }
+}
 
 
 

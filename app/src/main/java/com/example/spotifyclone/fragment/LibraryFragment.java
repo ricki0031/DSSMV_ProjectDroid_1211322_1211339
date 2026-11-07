@@ -1,6 +1,5 @@
 package com.example.spotifyclone.fragment;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -12,7 +11,6 @@ import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.io.IOException;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -20,7 +18,6 @@ import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.Response;
 
-import com.example.spotifyclone.AlbumActivity;
 import com.example.spotifyclone.R;
 import com.example.spotifyclone.adapter.AlbumAdapter;
 import com.example.spotifyclone.api.AlbumApiClient;
@@ -35,15 +32,11 @@ public class LibraryFragment extends Fragment {
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        // Os Fragments não usam setContentView. Eles "insuflam" (inflate) uma view.
-        // Vamos aproveitar o activity_main antigo que tinha a grelha, mas precisamos criar um layout xml próprio.
-        // Para simplificar, vou pedir-te para criares o fragment_library.xml a seguir.
         View view = inflater.inflate(R.layout.fragment_library, container, false);
 
         recyclerViewGrid = view.findViewById(R.id.recyclerViewLibrary);
         recyclerViewGrid.setLayoutManager(new GridLayoutManager(getContext(), 2));
 
-        // Recebemos o token que a MainActivity nos vai passar
         if (getArguments() != null) {
             accessToken = getArguments().getString("ACCESS_TOKEN");
             fetchSavedAlbums(accessToken);
@@ -71,7 +64,6 @@ public class LibraryFragment extends Fragment {
                         }
                     }
 
-                    // Num Fragment, usamos getActivity().runOnUiThread
                     if (getActivity() != null) {
                         getActivity().runOnUiThread(new Runnable() {
                             @Override
@@ -79,10 +71,20 @@ public class LibraryFragment extends Fragment {
                                 AlbumAdapter adapter = new AlbumAdapter(meusAlbums, new AlbumAdapter.OnItemClickListener() {
                                     @Override
                                     public void onItemClick(Album album) {
-                                        Intent intent = new Intent(getActivity(), AlbumActivity.class);
-                                        intent.putExtra("ACCESS_TOKEN", token);
-                                        intent.putExtra("ALBUM_ID", album.id);
-                                        startActivity(intent);
+                                        // Transição correta por FragmentManager
+                                        Bundle args = new Bundle();
+                                        args.putString("ACCESS_TOKEN", token);
+                                        args.putString("ALBUM_ID", album.id);
+
+                                        AlbumFragment albumFragment = new AlbumFragment();
+                                        albumFragment.setArguments(args);
+
+                                        if (getActivity() != null) {
+                                            getActivity().getSupportFragmentManager().beginTransaction()
+                                                    .replace(R.id.fragment_container, albumFragment)
+                                                    .addToBackStack(null)
+                                                    .commit();
+                                        }
                                     }
                                 });
                                 recyclerViewGrid.setAdapter(adapter);

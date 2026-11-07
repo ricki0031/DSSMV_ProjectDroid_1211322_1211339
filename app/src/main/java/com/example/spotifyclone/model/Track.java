@@ -19,4 +19,7 @@ public class Track {
 
     @SerializedName("artists")
     public List<Artist> artists;
+
+    @SerializedName("album")
+    public Album album;
 }
