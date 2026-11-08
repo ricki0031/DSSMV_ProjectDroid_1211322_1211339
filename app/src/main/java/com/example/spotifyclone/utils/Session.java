@@ -9,11 +9,6 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
-/**
- * Guarda a sessão do Spotify (access token, refresh token, validade e scopes) nas SharedPreferences.
- * Qualquer Fragment/Activity pode pedir o token mais recente com Session.getAccessToken(context),
- * em vez de depender de um token antigo passado por Bundle (que expira ao fim de 1 hora).
- */
 public final class Session {
 
     public static final String PREFS = "spotify_prefs";
@@ -22,7 +17,6 @@ public final class Session {
     private static final String KEY_EXPIRES_AT = "expires_at";
     private static final String KEY_SCOPES = "granted_scopes";
 
-    // Margem de segurança: consideramos o token expirado 60s antes da hora real
     private static final long EXPIRY_MARGIN_MS = 60_000;
 
     private static volatile String cachedToken;
@@ -49,15 +43,23 @@ public final class Session {
     }
 
     public static boolean isExpired(Context context) {
-        return System.currentTimeMillis() > getExpiresAt(context) - EXPIRY_MARGIN_MS;
+        long limit = getExpiresAt(context) - EXPIRY_MARGIN_MS;
+        if (System.currentTimeMillis() > limit) {
+            return true;
+        } else {
+            return false;
+        }
     }
 
-    /** Verifica se a sessão guardada já tem todos os scopes que a app precisa. */
     public static boolean hasScopes(Context context, String requiredScopes) {
         String granted = prefs(context).getString(KEY_SCOPES, "");
         Set<String> grantedSet = new HashSet<>(Arrays.asList(granted.split(" ")));
-        for (String scope : requiredScopes.split(" ")) {
-            if (!scope.isEmpty() && !grantedSet.contains(scope)) return false;
+        String[] requiredArray = requiredScopes.split(" ");
+
+        for (String scope : requiredArray) {
+            if (!scope.isEmpty() && !grantedSet.contains(scope)) {
+                return false;
+            }
         }
         return true;
     }
@@ -65,15 +67,18 @@ public final class Session {
     public static void save(Context context, TokenResponse token) {
         SharedPreferences.Editor editor = prefs(context).edit();
         editor.putString(KEY_ACCESS, token.getAccessToken());
-        // O Spotify nem sempre devolve um refresh token novo no refresh: nesse caso mantemos o antigo
+
         if (token.getRefreshToken() != null) {
             editor.putString(KEY_REFRESH, token.getRefreshToken());
         }
         if (token.getScope() != null) {
             editor.putString(KEY_SCOPES, token.getScope());
         }
-        editor.putLong(KEY_EXPIRES_AT, System.currentTimeMillis() + token.getExpiresIn() * 1000L);
+
+        long expiresAt = System.currentTimeMillis() + (token.getExpiresIn() * 1000L);
+        editor.putLong(KEY_EXPIRES_AT, expiresAt);
         editor.apply();
+
         cachedToken = token.getAccessToken();
     }
 

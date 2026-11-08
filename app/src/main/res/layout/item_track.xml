@@ -24,6 +24,18 @@
         app:layout_constraintTop_toTopOf="parent"
         tools:text="1" />
 
+    <!-- Capa da Música (Visível apenas em Playlists e Pesquisa) -->
+    <ImageView
+        android:id="@+id/imageTrackCover"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:scaleType="centerCrop"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:srcCompat="@tools:sample/backgrounds/scenic" />
+
     <!-- Nome da Faixa -->
     <TextView
         android:id="@+id/textTrackName"
@@ -54,6 +66,20 @@
         app:layout_constraintStart_toStartOf="@+id/textTrackName"
         app:layout_constraintTop_toBottomOf="@+id/textTrackName"
         tools:text="Pitbull" />
+
+    <!-- Botão "Mais opções" (Os 3 pontinhos) -->
+    <ImageView
+        android:id="@+id/btnTrackMore"
+        android:layout_width="32dp"
+        android:layout_height="32dp"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:padding="8dp"
+        android:src="@android:drawable/ic_menu_more"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:tint="#B3B3B3" />
 
     <!-- Duração da Faixa -->
     <TextView

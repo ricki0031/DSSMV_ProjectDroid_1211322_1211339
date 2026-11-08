@@ -36,4 +36,20 @@ public class SpotifyAuthClient {
         // Executa o pedido de forma invisível (em background)
         client.newCall(request).enqueue(callback);
     }
+
+    public static void refreshAccessToken(String clientId, String refreshToken, Callback callback) {
+        RequestBody formBody = new FormBody.Builder()
+                .add("client_id", clientId)
+                .add("grant_type", "refresh_token")
+                .add("refresh_token", refreshToken)
+                .build();
+
+        Request request = new Request.Builder()
+                .url("https://accounts.spotify.com/api/token")
+                .addHeader("Content-Type", "application/x-www-form-urlencoded")
+                .post(formBody)
+                .build();
+
+        client.newCall(request).enqueue(callback);
+    }
 }

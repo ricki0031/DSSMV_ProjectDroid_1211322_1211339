@@ -25,20 +25,17 @@ import com.example.spotifyclone.utils.PlaylistPicker;
 import com.example.spotifyclone.utils.Session;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.Locale;
 
-/**
- * Player em ecrã inteiro. Abre a deslizar de baixo para cima a partir do Mini-Player.
- * Usa GET /me/player (estado completo: faixa, progresso, shuffle, repeat, dispositivo).
- */
 public class PlayerActivity extends AppCompatActivity {
 
-    private static final long POLL_INTERVAL_MS = 5000;  // pergunta ao Spotify o estado a cada 5s
-    private static final long TICK_INTERVAL_MS = 1000;  // avança a barra localmente a cada 1s
+    private static final long POLL_INTERVAL_MS = 5000;
+    private static final long TICK_INTERVAL_MS = 1000;
 
     private ImageView imagePlayerCover, btnPlayPauseIcon, btnShuffle, btnRepeat, btnPlayerLike;
-    private TextView textPlayerTitle, textPlayerArtist, textCurrentTime, textRemainingTime,
-            textPlayingFrom, textDevice, textQueue;
+    private TextView textPlayerTitle, textPlayerArtist, textCurrentTime, textRemainingTime;
+    private TextView textPlayingFrom, textDevice, textQueue;
     private SeekBar seekBarPlayer;
 
     private String deviceId;
@@ -60,7 +57,9 @@ public class PlayerActivity extends AppCompatActivity {
             if (isPlaying && !userIsSeeking && durationMs > 0) {
                 progressMs = Math.min(durationMs, progressMs + (int) TICK_INTERVAL_MS);
                 renderProgress();
-                if (progressMs >= durationMs) fetchPlaybackState(); // a música acabou: ir buscar a próxima
+                if (progressMs >= durationMs) {
+                    fetchPlaybackState();
+                }
             }
             handler.postDelayed(this, TICK_INTERVAL_MS);
         }
@@ -79,7 +78,6 @@ public class PlayerActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_player);
 
-        // Animações de abrir (sobe) e fechar (desce) em Android 14+
         if (Build.VERSION.SDK_INT >= 34) {
             overrideActivityTransition(OVERRIDE_TRANSITION_OPEN, R.anim.slide_in_up, R.anim.stay);
             overrideActivityTransition(OVERRIDE_TRANSITION_CLOSE, R.anim.stay, R.anim.slide_out_down);
@@ -130,7 +128,7 @@ public class PlayerActivity extends AppCompatActivity {
         btnShuffle = findViewById(R.id.btnShuffle);
         btnRepeat = findViewById(R.id.btnRepeat);
         btnPlayerLike = findViewById(R.id.btnPlayerLike);
-        textPlayerTitle.setSelected(true); // ativa o texto a deslizar (marquee) em títulos longos
+        textPlayerTitle.setSelected(true);
     }
 
     private void setupListeners() {
@@ -140,11 +138,13 @@ public class PlayerActivity extends AppCompatActivity {
         FrameLayout btnPlayPause = findViewById(R.id.btnPlayPause);
         btnPlayPause.setOnClickListener(v -> togglePlayPause());
 
-        findViewById(R.id.btnNext).setOnClickListener(v ->
-                PlayerApiClient.skipToNext(token(), refreshSoon()));
+        findViewById(R.id.btnNext).setOnClickListener(v -> {
+            PlayerApiClient.skipToNext(token(), refreshSoon());
+        });
 
-        findViewById(R.id.btnPrevious).setOnClickListener(v ->
-                PlayerApiClient.skipToPrevious(token(), refreshSoon()));
+        findViewById(R.id.btnPrevious).setOnClickListener(v -> {
+            PlayerApiClient.skipToPrevious(token(), refreshSoon());
+        });
 
         btnShuffle.setOnClickListener(v -> {
             boolean newState = !isShuffle;
@@ -158,12 +158,19 @@ public class PlayerActivity extends AppCompatActivity {
         });
 
         btnRepeat.setOnClickListener(v -> {
-            // off -> context (repetir álbum/playlist) -> track (repetir faixa) -> off
-            String next = "off".equals(repeatState) ? "context" : ("context".equals(repeatState) ? "track" : "off");
-            PlayerApiClient.setRepeatMode(token(), next, new ApiCallback() {
+            String nextState;
+            if ("off".equals(repeatState)) {
+                nextState = "context";
+            } else if ("context".equals(repeatState)) {
+                nextState = "track";
+            } else {
+                nextState = "off";
+            }
+
+            PlayerApiClient.setRepeatMode(token(), nextState, new ApiCallback() {
                 @Override
                 protected void onSuccess(String body) {
-                    repeatState = next;
+                    repeatState = nextState;
                     renderShuffleRepeat();
                 }
             });
@@ -172,10 +179,19 @@ public class PlayerActivity extends AppCompatActivity {
         btnPlayerLike.setOnClickListener(v -> toggleLike());
 
         findViewById(R.id.btnPlayerMore).setOnClickListener(v -> {
-            if (currentTrack == null) return;
+            if (currentTrack == null) {
+                return;
+            }
+
             PopupMenu menu = new PopupMenu(this, v);
             menu.getMenu().add(0, 1, 0, "Adicionar a playlist");
-            menu.getMenu().add(0, 2, 1, isLiked ? "Remover das Liked Songs" : "Guardar nas Liked Songs");
+
+            if (isLiked) {
+                menu.getMenu().add(0, 2, 1, "Remover das Liked Songs");
+            } else {
+                menu.getMenu().add(0, 2, 1, "Guardar nas Liked Songs");
+            }
+
             menu.setOnMenuItemClickListener(item -> {
                 if (item.getItemId() == 1) {
                     PlaylistPicker.show(this, currentTrack.uriOrBuild(), currentTrack.name);
@@ -190,7 +206,9 @@ public class PlayerActivity extends AppCompatActivity {
         seekBarPlayer.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                if (fromUser) updateTimeLabels(progress, durationMs);
+                if (fromUser) {
+                    updateTimeLabels(progress, durationMs);
+                }
             }
 
             @Override
@@ -230,12 +248,11 @@ public class PlayerActivity extends AppCompatActivity {
         }
     }
 
-    /** Depois de next/previous o Spotify demora um pouco a mudar de faixa: esperamos ~600ms. */
     private ApiCallback refreshSoon() {
         return new ApiCallback() {
             @Override
             protected void onSuccess(String body) {
-                handler.postDelayed(PlayerActivity.this::fetchPlaybackState, 600);
+                handler.postDelayed(() -> fetchPlaybackState(), 600);
             }
         };
     }
@@ -244,28 +261,50 @@ public class PlayerActivity extends AppCompatActivity {
         PlayerApiClient.getPlaybackState(token(), new ApiCallback() {
             @Override
             protected void onSuccess(String body) {
-                if (isFinishing() || body.isEmpty()) return; // 204: nada a tocar
+                if (isFinishing() || body.isEmpty()) {
+                    return;
+                }
 
                 PlaybackStateResponse state = GSON.fromJson(body, PlaybackStateResponse.class);
-                if (state == null || state.item == null) return;
+                if (state == null || state.item == null) {
+                    return;
+                }
 
-                boolean trackChanged = currentTrack == null || !state.item.id.equals(currentTrack.id);
+                boolean trackChanged = false;
+                if (currentTrack == null || !state.item.id.equals(currentTrack.id)) {
+                    trackChanged = true;
+                }
+
                 currentTrack = state.item;
                 isPlaying = state.isPlaying;
                 isShuffle = state.shuffleState;
-                repeatState = state.repeatState != null ? state.repeatState : "off";
+
+                if (state.repeatState != null) {
+                    repeatState = state.repeatState;
+                } else {
+                    repeatState = "off";
+                }
+
                 durationMs = (int) state.item.durationMs;
-                if (!userIsSeeking) progressMs = (int) state.progressMs;
+                if (!userIsSeeking) {
+                    progressMs = (int) state.progressMs;
+                }
 
                 renderTrack();
                 renderProgress();
                 renderShuffleRepeat();
-                btnPlayPauseIcon.setImageResource(isPlaying ? R.drawable.ic_pause : R.drawable.ic_play);
+
+                if (isPlaying) {
+                    btnPlayPauseIcon.setImageResource(R.drawable.ic_pause);
+                } else {
+                    btnPlayPauseIcon.setImageResource(R.drawable.ic_play);
+                }
 
                 if (state.device != null) {
                     deviceId = state.device.id;
                     textDevice.setText("A tocar em " + state.device.name);
                 }
+
                 if (trackChanged) {
                     refreshLiked();
                     fetchQueue();
@@ -277,7 +316,10 @@ public class PlayerActivity extends AppCompatActivity {
     private void renderTrack() {
         textPlayerTitle.setText(currentTrack.name);
         textPlayerArtist.setText(currentTrack.artistNames());
-        if (currentTrack.album != null) textPlayingFrom.setText(currentTrack.album.name);
+
+        if (currentTrack.album != null) {
+            textPlayingFrom.setText(currentTrack.album.name);
+        }
 
         String cover = currentTrack.coverUrl();
         if (cover != null && !cover.equals(lastCoverUrl)) {
@@ -288,43 +330,82 @@ public class PlayerActivity extends AppCompatActivity {
 
     private void renderProgress() {
         seekBarPlayer.setMax(Math.max(durationMs, 1));
-        if (!userIsSeeking) seekBarPlayer.setProgress(progressMs);
+        if (!userIsSeeking) {
+            seekBarPlayer.setProgress(progressMs);
+        }
         updateTimeLabels(progressMs, durationMs);
     }
 
     private void renderShuffleRepeat() {
-        int green = 0xFF1ED760, white = 0xFFFFFFFF;
-        btnShuffle.setColorFilter(isShuffle ? green : white);
-        btnRepeat.setImageResource("track".equals(repeatState) ? R.drawable.ic_repeat_one : R.drawable.ic_repeat);
-        btnRepeat.setColorFilter("off".equals(repeatState) ? white : green);
+        int green = 0xFF1ED760;
+        int white = 0xFFFFFFFF;
+
+        if (isShuffle) {
+            btnShuffle.setColorFilter(green);
+        } else {
+            btnShuffle.setColorFilter(white);
+        }
+
+        if ("track".equals(repeatState)) {
+            btnRepeat.setImageResource(R.drawable.ic_repeat_one);
+        } else {
+            btnRepeat.setImageResource(R.drawable.ic_repeat);
+        }
+
+        if ("off".equals(repeatState)) {
+            btnRepeat.setColorFilter(white);
+        } else {
+            btnRepeat.setColorFilter(green);
+        }
     }
 
     private void refreshLiked() {
-        LibraryApiClient.checkLibraryContains(token(), Collections.singletonList(currentTrack.uriOrBuild()), new ApiCallback() {
+        List<String> uris = Collections.singletonList(currentTrack.uriOrBuild());
+        LibraryApiClient.checkUserSavedItems(token(), uris, new ApiCallback() {
             @Override
             protected void onSuccess(String body) {
                 Boolean[] result = GSON.fromJson(body, Boolean[].class);
-                isLiked = result != null && result.length > 0 && Boolean.TRUE.equals(result[0]);
-                btnPlayerLike.setImageResource(isLiked ? R.drawable.ic_check_circle : R.drawable.ic_add_circle);
-                btnPlayerLike.setColorFilter(isLiked ? 0xFF1ED760 : 0xFFFFFFFF);
+                if (result != null && result.length > 0 && Boolean.TRUE.equals(result[0])) {
+                    isLiked = true;
+                } else {
+                    isLiked = false;
+                }
+
+                if (isLiked) {
+                    btnPlayerLike.setImageResource(R.drawable.ic_check_circle);
+                    btnPlayerLike.setColorFilter(0xFF1ED760);
+                } else {
+                    btnPlayerLike.setImageResource(R.drawable.ic_add_circle);
+                    btnPlayerLike.setColorFilter(0xFFFFFFFF);
+                }
             }
         });
     }
 
     private void toggleLike() {
-        if (currentTrack == null) return;
+        if (currentTrack == null) {
+            return;
+        }
+
         ApiCallback after = new ApiCallback() {
             @Override
             protected void onSuccess(String body) {
-                Toast.makeText(PlayerActivity.this,
-                        isLiked ? "Removido das Liked Songs" : "Adicionado às Liked Songs", Toast.LENGTH_SHORT).show();
+                String message;
+                if (isLiked) {
+                    message = "Removido das Liked Songs";
+                } else {
+                    message = "Adicionado às Liked Songs";
+                }
+                Toast.makeText(PlayerActivity.this, message, Toast.LENGTH_SHORT).show();
                 refreshLiked();
             }
         };
+
+        List<String> uris = Collections.singletonList(currentTrack.uriOrBuild());
         if (isLiked) {
-            LibraryApiClient.removeFromLibrary(token(), Collections.singletonList(currentTrack.uriOrBuild()), after);
+            LibraryApiClient.removeItemsFromLibrary(token(), uris, after);
         } else {
-            LibraryApiClient.saveToLibrary(token(), Collections.singletonList(currentTrack.uriOrBuild()), after);
+            LibraryApiClient.saveItemsToLibrary(token(), uris, after);
         }
     }
 
@@ -337,13 +418,20 @@ public class PlayerActivity extends AppCompatActivity {
                     textQueue.setText("A fila está vazia.");
                     return;
                 }
+
                 StringBuilder sb = new StringBuilder();
-                for (int i = 0; i < Math.min(5, queue.queue.size()); i++) {
+                int count = Math.min(5, queue.queue.size());
+                for (int i = 0; i < count; i++) {
                     Track t = queue.queue.get(i);
-                    if (i > 0) sb.append('\n');
+                    if (i > 0) {
+                        sb.append('\n');
+                    }
                     sb.append(i + 1).append(". ").append(t.name);
+
                     String artists = t.artistNames();
-                    if (!artists.isEmpty()) sb.append(" — ").append(artists);
+                    if (!artists.isEmpty()) {
+                        sb.append(" — ").append(artists);
+                    }
                 }
                 textQueue.setText(sb.toString());
             }
@@ -352,12 +440,15 @@ public class PlayerActivity extends AppCompatActivity {
 
     private void updateTimeLabels(int currentMs, int totalMs) {
         textCurrentTime.setText(formatTime(currentMs));
-        textRemainingTime.setText("-" + formatTime(Math.max(0, totalMs - currentMs)));
+        int remainingMs = Math.max(0, totalMs - currentMs);
+        textRemainingTime.setText("-" + formatTime(remainingMs));
     }
 
     private String formatTime(int ms) {
         int totalSeconds = ms / 1000;
-        return String.format(Locale.getDefault(), "%d:%02d", totalSeconds / 60, totalSeconds % 60);
+        int minutes = totalSeconds / 60;
+        int seconds = totalSeconds % 60;
+        return String.format(Locale.getDefault(), "%d:%02d", minutes, seconds);
     }
 
     private void closePlayer() {

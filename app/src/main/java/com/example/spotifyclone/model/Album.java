@@ -14,6 +14,9 @@ public class Album {
     @SerializedName("album_type")
     public String albumType;
 
+    @SerializedName("release_date")
+    public String releaseDate;
+
     @SerializedName("total_tracks")
     public int totalTracks;
 
@@ -32,5 +35,28 @@ public class Album {
     public static class TracksPage {
         @SerializedName("items")
         public List<Track> items;
+    }
+
+    // Devolve o URL da primeira imagem da capa do álbum
+    public String firstImageUrl() {
+        if (images != null && !images.isEmpty()) {
+            return images.get(0).url;
+        }
+        return null;
+    }
+
+    // Junta o nome dos artistas do álbum
+    public String artistNames() {
+        if (artists == null || artists.isEmpty()) {
+            return "";
+        }
+        String names = "";
+        for (int i = 0; i < artists.size(); i++) {
+            if (i > 0) {
+                names += ", ";
+            }
+            names += artists.get(i).name;
+        }
+        return names;
     }
 }

@@ -6,6 +6,9 @@ import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.MediaType;
 
+import java.util.List;
+
+
 public class PlayerApiClient {
     private static final OkHttpClient client = new OkHttpClient();
     private static final String BASE_URL = "https://api.spotify.com/v1";
@@ -64,6 +67,63 @@ public class PlayerApiClient {
         }
 
         // Anexar o ID do dispositivo à rota original
+        String url = BASE_URL + "/me/player/play";
+        if (deviceId != null && !deviceId.isEmpty()) {
+            url += "?device_id=" + deviceId;
+        }
+
+        Request request = new Request.Builder()
+                .url(url)
+                .addHeader("Authorization", "Bearer " + accessToken)
+                .put(body)
+                .build();
+
+        client.newCall(request).enqueue(callback);
+    }
+
+    // Usa o MESMO endpoint (/me/player/play), mas envia "context_uri" (para tocar um álbum/playlist/artista inteiro)
+    public static void startContextPlayback(String accessToken, String contextUri, int offsetPosition, String deviceId, Callback callback) {
+        String jsonBody;
+        if (contextUri.startsWith("spotify:artist:")) {
+            // Para artistas, o Spotify não aceita "offset"
+            jsonBody = "{\"context_uri\": \"" + contextUri + "\"}";
+        } else {
+            jsonBody = "{\"context_uri\": \"" + contextUri + "\", \"offset\": {\"position\": " + offsetPosition + "}}";
+        }
+
+        MediaType JSON = MediaType.parse("application/json; charset=utf-8");
+        RequestBody body = RequestBody.create(jsonBody, JSON);
+
+        String url = BASE_URL + "/me/player/play";
+        if (deviceId != null && !deviceId.isEmpty()) {
+            url += "?device_id=" + deviceId;
+        }
+
+        Request request = new Request.Builder()
+                .url(url)
+                .addHeader("Authorization", "Bearer " + accessToken)
+                .put(body)
+                .build();
+
+        client.newCall(request).enqueue(callback);
+    }
+
+    // Usa o MESMO endpoint (/me/player/play), mas envia uma lista de "uris" (para tocar as Liked Songs todas)
+    public static void startUrisPlayback(String accessToken, List<String> uris, int offsetPosition, String deviceId, Callback callback) {
+        StringBuilder urisJson = new StringBuilder("[");
+        if (uris != null) {
+            for (int i = 0; i < uris.size(); i++) {
+                if (i > 0) urisJson.append(", ");
+                urisJson.append("\"").append(uris.get(i)).append("\"");
+            }
+        }
+        urisJson.append("]");
+
+        String jsonBody = "{\"uris\": " + urisJson.toString() + ", \"offset\": {\"position\": " + offsetPosition + "}}";
+
+        MediaType JSON = MediaType.parse("application/json; charset=utf-8");
+        RequestBody body = RequestBody.create(jsonBody, JSON);
+
         String url = BASE_URL + "/me/player/play";
         if (deviceId != null && !deviceId.isEmpty()) {
             url += "?device_id=" + deviceId;

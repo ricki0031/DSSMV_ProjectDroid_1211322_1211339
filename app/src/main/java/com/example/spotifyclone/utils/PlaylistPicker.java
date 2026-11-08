@@ -16,11 +16,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-/**
- * Diálogo "Adicionar a playlist": lista as playlists que o utilizador pode editar
- * (as que criou ou onde colabora) e adiciona a faixa à escolhida.
- * Usado no AlbumFragment, SearchFragment, PlayerActivity, etc.
- */
 public final class PlaylistPicker {
 
     private PlaylistPicker() {}
@@ -32,18 +27,32 @@ public final class PlaylistPicker {
             @Override
             protected void onSuccess(String profileJson) {
                 UserProfile me = GSON.fromJson(profileJson, UserProfile.class);
+
                 PlaylistApiClient.getCurrentUserPlaylists(token, 50, 0, new ApiCallback() {
                     @Override
                     protected void onSuccess(String body) {
-                        if (activity.isFinishing()) return;
+                        if (activity.isFinishing()) {
+                            return;
+                        }
+
                         Page<Playlist> page = GSON.fromJson(body, new TypeToken<Page<Playlist>>() {}.getType());
                         List<Playlist> editable = new ArrayList<>();
+
                         if (page != null && page.items != null) {
                             for (Playlist p : page.items) {
-                                boolean mine = p != null && p.owner != null && me != null && me.id != null && me.id.equals(p.owner.id);
-                                if (p != null && (mine || p.collaborative)) editable.add(p);
+                                if (p != null) {
+                                    boolean isMine = false;
+                                    if (p.owner != null && me != null && me.id != null && me.id.equals(p.owner.id)) {
+                                        isMine = true;
+                                    }
+
+                                    if (isMine || p.collaborative) {
+                                        editable.add(p);
+                                    }
+                                }
                             }
                         }
+
                         showDialog(activity, token, editable, trackUri, trackName);
                     }
                 });
@@ -56,14 +65,19 @@ public final class PlaylistPicker {
             Toast.makeText(activity, "Ainda não tens playlists. Cria uma na Library (+).", Toast.LENGTH_LONG).show();
             return;
         }
+
         String[] names = new String[playlists.size()];
-        for (int i = 0; i < playlists.size(); i++) names[i] = playlists.get(i).name;
+        for (int i = 0; i < playlists.size(); i++) {
+            names[i] = playlists.get(i).name;
+        }
+
+        List<String> urisToAdd = Collections.singletonList(trackUri);
 
         new AlertDialog.Builder(activity)
                 .setTitle("Adicionar \"" + trackName + "\" a…")
                 .setItems(names, (dialog, which) -> {
                     Playlist chosen = playlists.get(which);
-                    PlaylistApiClient.addItemsToPlaylist(token, chosen.id, Collections.singletonList(trackUri), new ApiCallback() {
+                    PlaylistApiClient.addItemsToPlaylist(token, chosen.id, urisToAdd, new ApiCallback() {
                         @Override
                         protected void onSuccess(String body) {
                             Toast.makeText(activity, "Adicionado a " + chosen.name, Toast.LENGTH_SHORT).show();

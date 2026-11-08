@@ -12,17 +12,23 @@ public abstract class BaseFragment extends Fragment {
 
     /** Token sempre atualizado (renovado automaticamente pela MainActivity). */
     protected String token() {
+
         return Session.getAccessToken(requireContext());
     }
 
     /** true se o Fragment ainda está no ecrã (as respostas da API podem chegar depois de sair). */
     protected boolean alive() {
+
         return isAdded() && getView() != null;
     }
 
     @Nullable
     protected MainActivity main() {
-        return getActivity() instanceof MainActivity ? (MainActivity) getActivity() : null;
+        if (getActivity() instanceof MainActivity) {
+            return (MainActivity) getActivity();
+        } else {
+            return null;
+        }
     }
 
     protected void open(MediaItem item) {
@@ -32,6 +38,10 @@ public abstract class BaseFragment extends Fragment {
 
     protected String deviceId() {
         MainActivity activity = main();
-        return activity != null ? activity.globalDeviceId : null;
+        if (activity != null) {
+            return activity.globalDeviceId;
+        } else {
+            return null;
+        }
     }
 }
