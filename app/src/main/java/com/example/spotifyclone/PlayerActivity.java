@@ -263,10 +263,10 @@ public class PlayerActivity extends AppCompatActivity {
 
         TextView saveOption = root.findViewById(R.id.optionToggleLiked);
         if (isLiked) {
-            saveOption.setText("Remover das Liked Songs");
+            saveOption.setText("Remover das Músicas favoritas");
             saveOption.setCompoundDrawablesRelativeWithIntrinsicBounds(R.drawable.ic_check_circle, 0, 0, 0);
         } else {
-            saveOption.setText("Guardar nas Liked Songs");
+            saveOption.setText("Guardar nas Músicas favoritas");
             saveOption.setCompoundDrawablesRelativeWithIntrinsicBounds(R.drawable.ic_favorite_border, 0, 0, 0);
         }
 
@@ -531,9 +531,9 @@ public class PlayerActivity extends AppCompatActivity {
             protected void onSuccess(String body) {
                 String message;
                 if (isLiked) {
-                    message = "Removido das Liked Songs";
+                    message = "Removido das Músicas favoritas";
                 } else {
-                    message = "Adicionado às Liked Songs";
+                    message = "Adicionado às Músicas favoritas";
                 }
                 Toast.makeText(PlayerActivity.this, message, Toast.LENGTH_SHORT).show();
                 refreshLiked();

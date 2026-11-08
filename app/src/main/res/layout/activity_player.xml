@@ -127,7 +127,7 @@
                 android:layout_width="40dp"
                 android:layout_height="40dp"
                 android:background="?attr/selectableItemBackgroundBorderless"
-                android:contentDescription="Guardar nas Liked Songs"
+                android:contentDescription="Guardar nas Músicas favoritas"
                 android:padding="4dp"
                 android:src="@drawable/ic_add_circle"
                 app:layout_constraintBottom_toBottomOf="@id/textPlayerArtist"

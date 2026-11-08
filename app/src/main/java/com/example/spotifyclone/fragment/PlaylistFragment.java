@@ -136,7 +136,7 @@ public class PlaylistFragment extends BaseFragment {
     }
 
     private void setupLikedSongsHeader() {
-        textName.setText("Liked Songs");
+        textName.setText("Músicas favoritas");
         imageCover.setImageResource(R.drawable.bg_liked_songs);
         textMeta.setText("A carregar…");
     }
@@ -240,9 +240,9 @@ public class PlaylistFragment extends BaseFragment {
 
         String count;
         if (total == 1) {
-            count = "1 song";
+            count = "1 música";
         } else {
-            count = total + " songs";
+            count = total + " músicas";
         }
 
         if (owner.isEmpty()) {
@@ -460,7 +460,7 @@ public class PlaylistFragment extends BaseFragment {
         }
 
         if (likedSongs) {
-            activity.showTrackMenu(anchor, track, "Remover das Liked Songs", () -> removeFromLikedSongs(track, position));
+            activity.showTrackMenu(anchor, track, "Remover das Músicas favoritas", () -> removeFromLikedSongs(track, position));
         } else if (editable) {
             activity.showTrackMenu(anchor, track, "Remover desta playlist", () -> removeFromPlaylist(track, position));
         } else {
@@ -494,7 +494,7 @@ public class PlaylistFragment extends BaseFragment {
         LibraryApiClient.removeItemsFromLibrary(token(), urisToRemove, new ApiCallback() {
             @Override
             protected void onSuccess(String body) {
-                onTrackRemoved(position, "Removido das Liked Songs");
+                onTrackRemoved(position, "Removido das Músicas favoritas");
             }
         });
     }

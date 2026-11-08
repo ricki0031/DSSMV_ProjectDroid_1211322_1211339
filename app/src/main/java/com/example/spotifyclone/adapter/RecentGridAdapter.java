@@ -8,26 +8,20 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.resource.bitmap.CircleCrop;
 import com.example.spotifyclone.R;
+import com.example.spotifyclone.model.MediaItem;
 import java.util.List;
 
 public class RecentGridAdapter extends RecyclerView.Adapter<RecentGridAdapter.ViewHolder> {
 
-    // O nosso modelo visual que mistura botões locais com músicas da API
-    public static class GridItem {
-        public String title;
-        public String imageUrl;
-        public boolean isLikedSongs; // Para sabermos se é o botão especial
-        public String id; // Para no futuro sabermos o que tocar
-    }
-
     public interface OnItemClickListener {
-        void onItemClick(GridItem item);
+        void onItemClick(MediaItem item);
     }
 
-    private List<GridItem> items;
+    private List<MediaItem> items;
     private OnItemClickListener listener; // 2. Variável para guardar o listener
-    public RecentGridAdapter(List<GridItem> items, OnItemClickListener listener) {
+    public RecentGridAdapter(List<MediaItem> items, OnItemClickListener listener) {
         this.items = items;
         this.listener = listener;
     }
@@ -41,15 +35,19 @@ public class RecentGridAdapter extends RecyclerView.Adapter<RecentGridAdapter.Vi
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        GridItem item = items.get(position);
+        MediaItem item = items.get(position);
         holder.title.setText(item.title);
 
-        if (item.isLikedSongs) {
-            // Se for o Liked Songs, metemos um ícone de sistema do Android (um coração ou estrela)
+        if (item.isLikedSongs()) {
             holder.image.clearColorFilter();
             holder.image.setImageResource(R.drawable.bg_liked_songs);
+        } else if (item.isArtist()) {
+            // Os artistas aparecem com a imagem redonda
+            Glide.with(holder.itemView.getContext())
+                    .load(item.imageUrl)
+                    .transform(new CircleCrop())
+                    .into(holder.image);
         } else {
-            // Se for da API, carregamos a capa do álbum
             Glide.with(holder.itemView.getContext())
                     .load(item.imageUrl)
                     .into(holder.image);

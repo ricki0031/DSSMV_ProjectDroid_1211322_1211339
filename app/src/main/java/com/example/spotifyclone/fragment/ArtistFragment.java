@@ -144,7 +144,7 @@ public class ArtistFragment extends BaseFragment {
                         if ("single".equals(album.albumType)) {
                             type = "Single";
                         } else {
-                            type = "Album";
+                            type = "Álbum";
                         }
 
                         if (year.isEmpty()) {

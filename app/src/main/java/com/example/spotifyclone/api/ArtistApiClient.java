@@ -19,10 +19,21 @@ public class ArtistApiClient {
         client.newCall(request).enqueue(callback);
     }
 
+    // Endpoint: Get User's Top Artists (GET /me/top/artists), das últimas semanas
+    public static void getTopArtists(String accessToken, Callback callback) {
+        Request request = new Request.Builder()
+                .url(BASE_URL + "/me/top/artists?time_range=short_term&limit=20")
+                .addHeader("Authorization", "Bearer " + accessToken)
+                .get()
+                .build();
+
+        client.newCall(request).enqueue(callback);
+    }
+
     // Endpoint: Get Artist's Albums (GET /artists/{id}/albums)
     public static void getArtistAlbums(String accessToken, String artistId, Callback callback) {
         Request request = new Request.Builder()
-                .url(BASE_URL + "/artists/" + artistId + "/albums?include_groups=album,single&limit=50")
+                .url(BASE_URL + "/artists/" + artistId + "/albums?include_groups=album,single&limit=10")
                 .addHeader("Authorization", "Bearer " + accessToken)
                 .get()
                 .build();

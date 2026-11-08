@@ -15,33 +15,46 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.spotifyclone.R;
-import com.example.spotifyclone.adapter.HorizontalCardAdapter;
 import com.example.spotifyclone.adapter.MediaCardAdapter;
 import com.example.spotifyclone.adapter.RecentGridAdapter;
 import com.example.spotifyclone.api.AlbumApiClient;
+import com.example.spotifyclone.api.ArtistApiClient;
 import com.example.spotifyclone.api.PlayerApiClient;
 import com.example.spotifyclone.api.PlaylistApiClient;
 import com.example.spotifyclone.model.Album;
+import com.example.spotifyclone.model.Artist;
 import com.example.spotifyclone.model.MediaItem;
 import com.example.spotifyclone.model.Page;
 import com.example.spotifyclone.model.Playlist;
 import com.example.spotifyclone.model.RecentlyPlayedResponse;
 import com.example.spotifyclone.model.SavedAlbumsResponse;
+import com.example.spotifyclone.utils.ApiCallback;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
 import java.io.IOException;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.Response;
 
-public class HomeFragment extends Fragment {
+public class HomeFragment extends BaseFragment {
+
+    // A grelha tem 8 posições: Músicas favoritas + 7 álbuns/artistas
+    private static final int GRID_MEDIA_ITEMS = 7;
+    private static final int MAX_RECENT_ARTISTS = 8;
+
+    private List<MediaItem> savedAlbums = new ArrayList<>();
+    private List<MediaItem> topArtists = new ArrayList<>();
 
     private RecyclerView recyclerViewGrid;
     private RecyclerView recyclerViewRecommended;
@@ -92,8 +105,8 @@ public class HomeFragment extends Fragment {
                 )
         );
 
-        // O cartão Liked Songs fica sempre disponível.
-        showHomeGrid(new ArrayList<>());
+        // O cartão Músicas favoritas fica sempre disponível.
+        showQuickAccess();
 
         if (getArguments() != null) {
             accessToken = getArguments().getString("ACCESS_TOKEN");
@@ -101,6 +114,7 @@ public class HomeFragment extends Fragment {
 
         if (accessToken != null && !accessToken.isEmpty()) {
             fetchSavedAlbums(accessToken);
+            fetchTopArtists(accessToken);
             fetchPlaylists(accessToken);
             fetchRecentlyPlayed(accessToken);
         } else {
@@ -135,77 +149,92 @@ public class HomeFragment extends Fragment {
                             SavedAlbumsResponse.class
                     );
 
-                    List<Album> albums = new ArrayList<>();
+                    List<MediaItem> albums = new ArrayList<>();
 
                     if (result != null && result.items != null) {
                         for (SavedAlbumsResponse.SavedAlbumItem item
                                 : result.items) {
-                            if (item != null && item.album != null) {
-                                albums.add(item.album);
+                            if (item != null
+                                    && item.album != null
+                                    && item.album.id != null) {
+                                albums.add(MediaItem.fromAlbum(item.album));
                             }
                         }
                     }
 
                     runOnUiThread(() -> {
-                        showHomeGrid(albums);
-
-                        recyclerViewJumpBackIn.setAdapter(
-                                new HorizontalCardAdapter(
-                                        albums,
-                                        album -> openAlbum(album.id)
-                                )
-                        );
+                        savedAlbums = albums;
+                        showQuickAccess();
                     });
                 }
             }
         });
     }
 
-    private void showHomeGrid(List<Album> albums) {
-        List<RecentGridAdapter.GridItem> items = new ArrayList<>();
+    private void fetchTopArtists(String token) {
+        ArtistApiClient.getTopArtists(token, new ApiCallback() {
+            @Override
+            protected void onSuccess(String body) {
+                if (!alive()) {
+                    return;
+                }
 
-        RecentGridAdapter.GridItem likedSongs =
-                new RecentGridAdapter.GridItem();
+                Page<Artist> page = GSON.fromJson(
+                        body,
+                        new TypeToken<Page<Artist>>() {}.getType()
+                );
 
-        likedSongs.title = "Liked Songs";
-        likedSongs.isLikedSongs = true;
-        items.add(likedSongs);
+                List<MediaItem> artists = new ArrayList<>();
 
-        int count = 0;
+                if (page != null && page.items != null) {
+                    for (Artist artist : page.items) {
+                        if (artist != null && artist.id != null) {
+                            artists.add(MediaItem.fromArtist(artist));
+                        }
+                    }
+                }
 
-        for (Album album : albums) {
-            if (album == null || album.id == null) {
-                continue;
+                topArtists = artists;
+                showQuickAccess();
             }
+        });
+    }
 
-            RecentGridAdapter.GridItem item =
-                    new RecentGridAdapter.GridItem();
+    /** Preenche a grelha e o "Voltar a ouvir" com álbuns e artistas alternados. */
+    private void showQuickAccess() {
+        List<MediaItem> mixed = interleave(savedAlbums, topArtists);
 
-            item.id = album.id;
-            item.title = album.name;
-            item.isLikedSongs = false;
+        List<MediaItem> gridItems = new ArrayList<>();
+        gridItems.add(MediaItem.likedSongs());
+        gridItems.addAll(
+                mixed.subList(0, Math.min(GRID_MEDIA_ITEMS, mixed.size()))
+        );
 
-            if (album.images != null && !album.images.isEmpty()) {
-                item.imageUrl = album.images.get(0).url;
+        recyclerViewGrid.setAdapter(new RecentGridAdapter(gridItems, this::open));
+
+        recyclerViewJumpBackIn.setAdapter(
+                new MediaCardAdapter(
+                        mixed,
+                        MediaCardAdapter.STYLE_CARD,
+                        this::open
+                )
+        );
+    }
+
+    private List<MediaItem> interleave(List<MediaItem> first, List<MediaItem> second) {
+        List<MediaItem> result = new ArrayList<>();
+        int longest = Math.max(first.size(), second.size());
+
+        for (int i = 0; i < longest; i++) {
+            if (i < first.size()) {
+                result.add(first.get(i));
             }
-
-            items.add(item);
-
-            count++;
-            if (count >= 7) {
-                break;
+            if (i < second.size()) {
+                result.add(second.get(i));
             }
         }
 
-        recyclerViewGrid.setAdapter(
-                new RecentGridAdapter(items, item -> {
-                    if (item.isLikedSongs) {
-                        openLibrary();
-                    } else if (item.id != null) {
-                        openAlbum(item.id);
-                    }
-                })
-        );
+        return result;
     }
 
     private void fetchPlaylists(String token) {
@@ -329,35 +358,21 @@ public class HomeFragment extends Fragment {
                                                     ? result.items.size()
                                                     : "null")
                             );
-                            List<Album> albums = new ArrayList<>();
-                            Set<String> seenIds = new HashSet<>();
+                            List<RecentlyPlayedResponse.TrackItem> tracks =
+                                    new ArrayList<>();
 
                             if (result != null && result.items != null) {
                                 for (RecentlyPlayedResponse.PlayHistoryObject history
                                         : result.items) {
-
-                                    if (history == null
-                                            || history.track == null
-                                            || history.track.album == null) {
-                                        continue;
-                                    }
-
-                                    Album album = history.track.album;
-
-                                    if (album.id != null
-                                            && seenIds.add(album.id)) {
-                                        albums.add(album);
+                                    if (history != null && history.track != null) {
+                                        tracks.add(history.track);
                                     }
                                 }
                             }
 
                             runOnUiThread(() -> {
-                                recyclerViewRecents.setAdapter(
-                                        new HorizontalCardAdapter(
-                                                albums,
-                                                album -> openAlbum(album.id)
-                                        )
-                                );
+                                showRecents(tracks, Collections.emptyMap());
+                                fetchRecentArtists(token, tracks);
                             });
                         }
                     }
@@ -365,19 +380,84 @@ public class HomeFragment extends Fragment {
         );
     }
 
-    private void openAlbum(String albumId) {
-        if (!isAdded() || albumId == null) {
-            return;
+    /** O histórico só traz o nome dos artistas: as imagens têm de ser pedidas uma a uma. */
+    private void fetchRecentArtists(
+            String token,
+            List<RecentlyPlayedResponse.TrackItem> tracks
+    ) {
+        Set<String> artistIds = new LinkedHashSet<>();
+
+        for (RecentlyPlayedResponse.TrackItem track : tracks) {
+            String artistId = primaryArtistId(track);
+            if (artistId != null && artistIds.size() < MAX_RECENT_ARTISTS) {
+                artistIds.add(artistId);
+            }
         }
 
-        Bundle args = new Bundle();
-        args.putString("ACCESS_TOKEN", accessToken);
-        args.putString("ALBUM_ID", albumId);
+        Map<String, Artist> artistsById = new HashMap<>();
+        int[] pending = {artistIds.size()};
 
-        AlbumFragment fragment = new AlbumFragment();
-        fragment.setArguments(args);
+        for (String artistId : artistIds) {
+            ArtistApiClient.getArtist(token, artistId, new ApiCallback() {
+                @Override
+                protected void onSuccess(String body) {
+                    Artist artist = GSON.fromJson(body, Artist.class);
+                    if (artist != null && artist.id != null) {
+                        artistsById.put(artist.id, artist);
+                    }
+                    onArtistFinished();
+                }
 
-        navigateTo(fragment);
+                @Override
+                protected void onError(int code, String body) {
+                    super.onError(code, body);
+                    onArtistFinished();
+                }
+
+                private void onArtistFinished() {
+                    pending[0]--;
+                    if (pending[0] == 0 && alive()) {
+                        showRecents(tracks, artistsById);
+                    }
+                }
+            });
+        }
+    }
+
+    private String primaryArtistId(RecentlyPlayedResponse.TrackItem track) {
+        if (track.artists == null || track.artists.isEmpty()) {
+            return null;
+        }
+        return track.artists.get(0).id;
+    }
+
+    /** Mostra álbuns e artistas pela ordem em que foram ouvidos, sem repetir. */
+    private void showRecents(
+            List<RecentlyPlayedResponse.TrackItem> tracks,
+            Map<String, Artist> artistsById
+    ) {
+        List<MediaItem> items = new ArrayList<>();
+        Set<String> seenIds = new HashSet<>();
+
+        for (RecentlyPlayedResponse.TrackItem track : tracks) {
+            Album album = track.album;
+            if (album != null && album.id != null && seenIds.add(album.id)) {
+                items.add(MediaItem.fromAlbum(album));
+            }
+
+            Artist artist = artistsById.get(primaryArtistId(track));
+            if (artist != null && seenIds.add(artist.id)) {
+                items.add(MediaItem.fromArtist(artist));
+            }
+        }
+
+        recyclerViewRecents.setAdapter(
+                new MediaCardAdapter(
+                        items,
+                        MediaCardAdapter.STYLE_CARD,
+                        this::open
+                )
+        );
     }
 
     private void openPlaylist(String playlistId) {
@@ -390,20 +470,6 @@ public class HomeFragment extends Fragment {
         args.putString("PLAYLIST_ID", playlistId);
 
         PlaylistFragment fragment = new PlaylistFragment();
-        fragment.setArguments(args);
-
-        navigateTo(fragment);
-    }
-
-    private void openLibrary() {
-        if (!isAdded()) {
-            return;
-        }
-
-        Bundle args = new Bundle();
-        args.putString("ACCESS_TOKEN", accessToken);
-
-        LibraryFragment fragment = new LibraryFragment();
         fragment.setArguments(args);
 
         navigateTo(fragment);

@@ -17,5 +17,7 @@ public class RecentlyPlayedResponse {
         public String name;
         @SerializedName("album")
         public Album album; // Reutilizamos a tua classe Album para ir buscar a capa!
+        @SerializedName("artists")
+        public List<Artist> artists;
     }
 }

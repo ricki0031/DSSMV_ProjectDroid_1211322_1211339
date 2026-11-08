@@ -24,7 +24,7 @@ public class MediaItem {
         MediaItem item = new MediaItem();
         item.type = TYPE_LIKED_SONGS;
         item.id = "liked_songs";
-        item.title = "Liked Songs";
+        item.title = "Músicas favoritas";
         item.subtitle = "Playlist";
         return item;
     }
@@ -36,9 +36,9 @@ public class MediaItem {
         item.title = album.name;
 
         if (album.artists != null && !album.artists.isEmpty()) {
-            item.subtitle = "Album • " + album.artists.get(0).name;
+            item.subtitle = "Álbum • " + album.artists.get(0).name;
         } else {
-            item.subtitle = "Album";
+            item.subtitle = "Álbum";
         }
 
         if (album.images != null && !album.images.isEmpty()) {
@@ -69,7 +69,7 @@ public class MediaItem {
         item.type = TYPE_ARTIST;
         item.id = artist.id;
         item.title = artist.name;
-        item.subtitle = "Artist";
+        item.subtitle = "Artista";
 
         if (artist.images != null && !artist.images.isEmpty()) {
             item.imageUrl = artist.images.get(0).url;

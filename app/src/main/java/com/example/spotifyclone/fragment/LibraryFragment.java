@@ -45,6 +45,11 @@ import okhttp3.Response;
 
 public class LibraryFragment extends Fragment {
 
+    private static final int ALBUM_VIEW_GRID = 0;
+    private static final int ALBUM_VIEW_LARGE = 1;
+    private static final int ALBUM_VIEW_LIST = 2;
+    private static final int ALBUM_VIEW_COUNT = 3;
+
     private RecyclerView recyclerViewGrid;
     private RecyclerView recyclerViewPlaylists;
 
@@ -65,6 +70,7 @@ public class LibraryFragment extends Fragment {
 
     private boolean showingPlaylists = true;
     private boolean gridMode = false;
+    private int albumViewMode = ALBUM_VIEW_GRID;
 
     @Nullable
     @Override
@@ -101,12 +107,16 @@ public class LibraryFragment extends Fragment {
 
         buttonFilterAlbums.setOnClickListener(v -> {
             showingPlaylists = false;
-            gridMode = true;
+            albumViewMode = ALBUM_VIEW_GRID;
             updateLibraryView();
         });
 
         buttonLibraryViewMode.setOnClickListener(v -> {
-            gridMode = !gridMode;
+            if (showingPlaylists) {
+                gridMode = !gridMode;
+            } else {
+                albumViewMode = (albumViewMode + 1) % ALBUM_VIEW_COUNT;
+            }
             updateLibraryView();
         });
 
@@ -218,18 +228,37 @@ public class LibraryFragment extends Fragment {
             recyclerViewPlaylists.setVisibility(View.GONE);
             recyclerViewGrid.setVisibility(View.VISIBLE);
 
-            recyclerViewGrid.setLayoutManager(
-                    gridMode
-                            ? new GridLayoutManager(requireContext(), 2)
-                            : new LinearLayoutManager(requireContext())
-            );
+            if (albumViewMode == ALBUM_VIEW_LIST) {
+                recyclerViewGrid.setLayoutManager(
+                        new LinearLayoutManager(requireContext())
+                );
 
-            albumAdapter = new AlbumAdapter(
-                    new ArrayList<>(albums),
-                    album -> openAlbum(album, accessToken)
-            );
+                List<MediaItem> albumRows = new ArrayList<>();
+                for (Album album : albums) {
+                    albumRows.add(MediaItem.fromAlbum(album));
+                }
 
-            recyclerViewGrid.setAdapter(albumAdapter);
+                recyclerViewGrid.setAdapter(
+                        new MediaCardAdapter(
+                                albumRows,
+                                MediaCardAdapter.STYLE_LIST,
+                                item -> openAlbum(item.id, accessToken)
+                        )
+                );
+            } else {
+                recyclerViewGrid.setLayoutManager(
+                        albumViewMode == ALBUM_VIEW_GRID
+                                ? new GridLayoutManager(requireContext(), 2)
+                                : new LinearLayoutManager(requireContext())
+                );
+
+                albumAdapter = new AlbumAdapter(
+                        new ArrayList<>(albums),
+                        album -> openAlbum(album.id, accessToken)
+                );
+
+                recyclerViewGrid.setAdapter(albumAdapter);
+            }
         }
     }
 
@@ -452,14 +481,14 @@ public class LibraryFragment extends Fragment {
         });
     }
 
-    private void openAlbum(Album album, String token) {
-        if (!isAdded() || album == null) {
+    private void openAlbum(String albumId, String token) {
+        if (!isAdded() || albumId == null) {
             return;
         }
 
         Bundle args = new Bundle();
         args.putString("ACCESS_TOKEN", token);
-        args.putString("ALBUM_ID", album.id);
+        args.putString("ALBUM_ID", albumId);
 
         AlbumFragment fragment = new AlbumFragment();
         fragment.setArguments(args);

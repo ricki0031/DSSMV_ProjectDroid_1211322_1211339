@@ -87,7 +87,7 @@
             android:id="@+id/optionToggleLiked"
             style="@style/TrackOptionRow"
             android:drawableStart="@drawable/ic_favorite_border"
-            android:text="Guardar nas Liked Songs" />
+            android:text="Guardar nas Músicas favoritas" />
 
         <TextView
             android:id="@+id/optionAddToQueue"

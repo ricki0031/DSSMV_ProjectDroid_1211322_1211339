@@ -15,6 +15,9 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.graphics.Insets;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
 import androidx.fragment.app.Fragment;
 
 import com.bumptech.glide.Glide;
@@ -73,6 +76,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        applyStatusBarInset();
         setupMiniPlayerControls();
 
         if (getIntent() != null && getIntent().getData() != null
@@ -81,6 +85,16 @@ public class MainActivity extends AppCompatActivity {
         } else {
             restoreOrAuthenticate();
         }
+    }
+
+    /** Mantém todos os fragmentos abaixo da status bar. */
+    private void applyStatusBarInset() {
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.fragment_container), (view, windowInsets) -> {
+            Insets bars = windowInsets.getInsets(
+                    WindowInsetsCompat.Type.statusBars() | WindowInsetsCompat.Type.displayCutout());
+            view.setPadding(view.getPaddingLeft(), bars.top, view.getPaddingRight(), view.getPaddingBottom());
+            return windowInsets;
+        });
     }
 
     private void restoreOrAuthenticate() {
@@ -366,7 +380,7 @@ public class MainActivity extends AppCompatActivity {
 
         PopupMenu menu = new PopupMenu(this, anchor);
         menu.getMenu().add(0, 1, 0, "Adicionar a playlist");
-        menu.getMenu().add(0, 2, 1, "Guardar nas Liked Songs");
+        menu.getMenu().add(0, 2, 1, "Guardar nas Músicas favoritas");
         menu.getMenu().add(0, 3, 2, "Adicionar à fila");
 
         if (extraLabel != null && extraAction != null) {
@@ -383,7 +397,7 @@ public class MainActivity extends AppCompatActivity {
                 LibraryApiClient.saveItemsToLibrary(token, Collections.singletonList(track.uriOrBuild()), new ApiCallback() {
                     @Override
                     protected void onSuccess(String body) {
-                        Toast.makeText(MainActivity.this, "Guardado nas Liked Songs", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(MainActivity.this, "Guardado nas Músicas favoritas", Toast.LENGTH_SHORT).show();
                     }
                 });
             } else if (id == 3) {
