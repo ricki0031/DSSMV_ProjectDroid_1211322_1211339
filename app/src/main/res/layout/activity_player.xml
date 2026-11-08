@@ -1,285 +1,309 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/playerRoot"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="@drawable/bg_player_gradient"
-    android:fillViewport="true">
+<androidx.core.widget.NestedScrollView
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:id="@+id/playerRoot"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@drawable/bg_player_gradient"
+        android:fillViewport="true"
+        android:clipToPadding="false">
 
     <androidx.constraintlayout.widget.ConstraintLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:paddingStart="24dp"
-        android:paddingTop="16dp"
-        android:paddingEnd="24dp"
-        android:paddingBottom="24dp">
-
-        <!-- Topo: fechar (v), "A tocar de" + nome do contexto, opções (•••) -->
-        <ImageView
-            android:id="@+id/btnPlayerClose"
-            android:layout_width="36dp"
-            android:layout_height="36dp"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:contentDescription="Fechar"
-            android:padding="4dp"
-            android:src="@drawable/ic_expand_more"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
-
-        <TextView
-            android:id="@+id/textPlayingFrom"
-            android:layout_width="0dp"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:layout_marginEnd="8dp"
-            android:ellipsize="end"
-            android:gravity="center"
-            android:maxLines="1"
-            android:textColor="#FFFFFF"
-            android:textSize="12sp"
-            android:textStyle="bold"
-            app:layout_constraintBottom_toBottomOf="@+id/btnPlayerClose"
-            app:layout_constraintEnd_toStartOf="@+id/btnPlayerMore"
-            app:layout_constraintStart_toEndOf="@+id/btnPlayerClose"
-            app:layout_constraintTop_toTopOf="@+id/btnPlayerClose"
-            tools:text="KIDS SEE GHOSTS" />
+            android:paddingStart="24dp"
+            android:paddingTop="20dp"
+            android:paddingEnd="24dp"
+            android:paddingBottom="36dp">
 
+        <!-- Fechar o player -->
         <ImageView
-            android:id="@+id/btnPlayerMore"
-            android:layout_width="36dp"
-            android:layout_height="36dp"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:contentDescription="Mais opções"
-            android:padding="6dp"
-            android:src="@drawable/ic_more_horiz"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+                android:id="@+id/btnPlayerClose"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="Fechar"
+                android:padding="5dp"
+                android:src="@drawable/ic_expand_more"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
 
-        <!-- Capa grande e quadrada -->
+        <!-- Contexto da reprodução -->
+        <TextView
+                android:id="@+id/textPlayingFrom"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:layout_marginEnd="8dp"
+                android:ellipsize="end"
+                android:gravity="center"
+                android:maxLines="1"
+                android:textColor="#FFFFFF"
+                android:textSize="12sp"
+                android:textStyle="bold"
+                android:letterSpacing="0.08"
+                app:layout_constraintBottom_toBottomOf="@id/btnPlayerClose"
+                app:layout_constraintEnd_toStartOf="@id/btnPlayerMore"
+                app:layout_constraintStart_toEndOf="@id/btnPlayerClose"
+                app:layout_constraintTop_toTopOf="@id/btnPlayerClose"
+                tools:text="A TOCAR DA PLAYLIST" />
+
+        <!-- Mais opções -->
+        <ImageView
+                android:id="@+id/btnPlayerMore"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="Mais opções"
+                android:padding="7dp"
+                android:src="@drawable/ic_more_horiz"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+        <!-- Capa do álbum -->
         <androidx.cardview.widget.CardView
-            android:id="@+id/cardPlayerCover"
-            android:layout_width="0dp"
-            android:layout_height="0dp"
-            android:layout_marginTop="40dp"
-            app:cardBackgroundColor="#282828"
-            app:cardCornerRadius="8dp"
-            app:cardElevation="8dp"
-            app:layout_constraintDimensionRatio="1:1"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/btnPlayerClose">
+                android:id="@+id/cardPlayerCover"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:layout_marginTop="34dp"
+                app:cardBackgroundColor="#282828"
+                app:cardCornerRadius="14dp"
+                app:cardElevation="14dp"
+                app:layout_constraintDimensionRatio="1:1"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/btnPlayerClose">
 
             <ImageView
-                android:id="@+id/imagePlayerCover"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:contentDescription="Capa"
-                android:scaleType="centerCrop"
-                tools:srcCompat="@tools:sample/backgrounds/scenic" />
+                    android:id="@+id/imagePlayerCover"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:contentDescription="Capa do álbum"
+                    android:scaleType="centerCrop"
+                    tools:srcCompat="@tools:sample/backgrounds/scenic" />
+
         </androidx.cardview.widget.CardView>
 
-        <!-- Título + artista + botão de like -->
+        <!-- Título da música -->
         <TextView
-            android:id="@+id/textPlayerTitle"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="40dp"
-            android:layout_marginEnd="16dp"
-            android:ellipsize="marquee"
-            android:marqueeRepeatLimit="marquee_forever"
-            android:singleLine="true"
-            android:textColor="#FFFFFF"
-            android:textSize="22sp"
-            android:textStyle="bold"
-            app:layout_constraintEnd_toStartOf="@+id/btnPlayerLike"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/cardPlayerCover"
-            tools:text="Fire" />
+                android:id="@+id/textPlayerTitle"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="32dp"
+                android:layout_marginEnd="18dp"
+                android:ellipsize="marquee"
+                android:marqueeRepeatLimit="marquee_forever"
+                android:singleLine="true"
+                android:textColor="#FFFFFF"
+                android:textSize="26sp"
+                android:textStyle="bold"
+                app:layout_constraintEnd_toStartOf="@id/btnPlayerLike"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/cardPlayerCover"
+                tools:text="MOLICEIRO" />
 
+        <!-- Artista -->
         <TextView
-            android:id="@+id/textPlayerArtist"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="2dp"
-            android:layout_marginEnd="16dp"
-            android:ellipsize="end"
-            android:maxLines="1"
-            android:textColor="#B3FFFFFF"
-            android:textSize="16sp"
-            app:layout_constraintEnd_toStartOf="@+id/btnPlayerLike"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/textPlayerTitle"
-            tools:text="KIDS SEE GHOSTS" />
+                android:id="@+id/textPlayerArtist"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="5dp"
+                android:layout_marginEnd="18dp"
+                android:ellipsize="end"
+                android:maxLines="1"
+                android:textColor="#D0D0D0"
+                android:textSize="16sp"
+                app:layout_constraintEnd_toStartOf="@id/btnPlayerLike"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/textPlayerTitle"
+                tools:text="ICARO" />
 
+        <!-- Adicionar às Liked Songs -->
         <ImageView
-            android:id="@+id/btnPlayerLike"
-            android:layout_width="32dp"
-            android:layout_height="32dp"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:contentDescription="Guardar nas Liked Songs"
-            android:src="@drawable/ic_add_circle"
-            app:layout_constraintBottom_toBottomOf="@+id/textPlayerArtist"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="@+id/textPlayerTitle"
-            app:tint="#FFFFFF" />
-
-        <!-- Barra de progresso -->
-        <SeekBar
-            android:id="@+id/seekBarPlayer"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
-            android:paddingStart="0dp"
-            android:paddingEnd="0dp"
-            android:progressBackgroundTint="#4DFFFFFF"
-            android:progressTint="#FFFFFF"
-            android:thumbTint="#FFFFFF"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/textPlayerArtist" />
-
-        <TextView
-            android:id="@+id/textCurrentTime"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
-            android:text="0:00"
-            android:textColor="#B3FFFFFF"
-            android:textSize="12sp"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/seekBarPlayer" />
-
-        <TextView
-            android:id="@+id/textRemainingTime"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
-            android:text="-0:00"
-            android:textColor="#B3FFFFFF"
-            android:textSize="12sp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/seekBarPlayer" />
-
-        <!-- Controlos: Shuffle, Anterior, Play/Pause, Seguinte, Repeat -->
-        <LinearLayout
-            android:id="@+id/layoutControls"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:gravity="center_vertical"
-            android:orientation="horizontal"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/textCurrentTime">
-
-            <ImageView
-                android:id="@+id/btnShuffle"
-                android:layout_width="0dp"
-                android:layout_height="28dp"
-                android:layout_weight="1"
-                android:background="?attr/selectableItemBackgroundBorderless"
-                android:contentDescription="Shuffle"
-                android:src="@drawable/ic_shuffle" />
-
-            <ImageView
-                android:id="@+id/btnPrevious"
-                android:layout_width="0dp"
+                android:id="@+id/btnPlayerLike"
+                android:layout_width="40dp"
                 android:layout_height="40dp"
-                android:layout_weight="1"
                 android:background="?attr/selectableItemBackgroundBorderless"
-                android:contentDescription="Anterior"
-                android:src="@drawable/ic_skip_previous" />
+                android:contentDescription="Guardar nas Liked Songs"
+                android:padding="4dp"
+                android:src="@drawable/ic_add_circle"
+                app:layout_constraintBottom_toBottomOf="@id/textPlayerArtist"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="@id/textPlayerTitle"
+                app:tint="#FFFFFF" />
 
+        <!-- Progresso da música -->
+        <SeekBar
+                android:id="@+id/seekBarPlayer"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="24dp"
+                android:paddingStart="0dp"
+                android:paddingEnd="0dp"
+                android:progressBackgroundTint="#66FFFFFF"
+                android:progressTint="#1ED760"
+                android:thumbTint="#FFFFFF"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/textPlayerArtist" />
+
+        <!-- Tempo decorrido -->
+        <TextView
+                android:id="@+id/textCurrentTime"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:text="0:00"
+                android:textColor="#C7C7C7"
+                android:textSize="12sp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/seekBarPlayer" />
+
+        <!-- Tempo restante -->
+        <TextView
+                android:id="@+id/textRemainingTime"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:text="-0:00"
+                android:textColor="#C7C7C7"
+                android:textSize="12sp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/seekBarPlayer" />
+
+        <!-- Controlos de reprodução -->
+        <LinearLayout
+                android:id="@+id/layoutControls"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="22dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/textCurrentTime">
+
+            <!-- Aleatório -->
+            <ImageView
+                    android:id="@+id/btnShuffle"
+                    android:layout_width="0dp"
+                    android:layout_height="32dp"
+                    android:layout_weight="1"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:contentDescription="Reprodução aleatória"
+                    android:src="@drawable/ic_shuffle" />
+
+            <!-- Anterior -->
+            <ImageView
+                    android:id="@+id/btnPrevious"
+                    android:layout_width="0dp"
+                    android:layout_height="44dp"
+                    android:layout_weight="1"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:contentDescription="Música anterior"
+                    android:src="@drawable/ic_skip_previous" />
+
+            <!-- Play/Pause -->
             <FrameLayout
-                android:id="@+id/btnPlayPause"
-                android:layout_width="68dp"
-                android:layout_height="68dp"
-                android:background="@drawable/bg_circle_white"
-                android:clickable="true"
-                android:contentDescription="Play/Pause"
-                android:focusable="true">
+                    android:id="@+id/btnPlayPause"
+                    android:layout_width="76dp"
+                    android:layout_height="76dp"
+                    android:background="@drawable/bg_circle_white"
+                    android:clickable="true"
+                    android:contentDescription="Reproduzir ou pausar"
+                    android:elevation="6dp"
+                    android:focusable="true">
 
                 <ImageView
-                    android:id="@+id/btnPlayPauseIcon"
-                    android:layout_width="34dp"
-                    android:layout_height="34dp"
-                    android:layout_gravity="center"
-                    android:src="@drawable/ic_play"
-                    app:tint="#000000" />
+                        android:id="@+id/btnPlayPauseIcon"
+                        android:layout_width="38dp"
+                        android:layout_height="38dp"
+                        android:layout_gravity="center"
+                        android:src="@drawable/ic_play"
+                        app:tint="#000000" />
+
             </FrameLayout>
 
+            <!-- Seguinte -->
             <ImageView
-                android:id="@+id/btnNext"
-                android:layout_width="0dp"
-                android:layout_height="40dp"
-                android:layout_weight="1"
-                android:background="?attr/selectableItemBackgroundBorderless"
-                android:contentDescription="Seguinte"
-                android:src="@drawable/ic_skip_next" />
+                    android:id="@+id/btnNext"
+                    android:layout_width="0dp"
+                    android:layout_height="44dp"
+                    android:layout_weight="1"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:contentDescription="Música seguinte"
+                    android:src="@drawable/ic_skip_next" />
 
+            <!-- Repetir -->
             <ImageView
-                android:id="@+id/btnRepeat"
-                android:layout_width="0dp"
-                android:layout_height="28dp"
-                android:layout_weight="1"
-                android:background="?attr/selectableItemBackgroundBorderless"
-                android:contentDescription="Repetir"
-                android:src="@drawable/ic_repeat" />
+                    android:id="@+id/btnRepeat"
+                    android:layout_width="0dp"
+                    android:layout_height="32dp"
+                    android:layout_weight="1"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:contentDescription="Repetir música"
+                    android:src="@drawable/ic_repeat" />
+
         </LinearLayout>
 
-        <!-- Nome do dispositivo onde está a tocar -->
+        <!-- Dispositivo de reprodução -->
         <TextView
-            android:id="@+id/textDevice"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
-            android:textColor="#1ED760"
-            android:textSize="12sp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/layoutControls"
-            tools:text="A tocar em RICARDOPC" />
+                android:id="@+id/textDevice"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="26dp"
+                android:gravity="center_vertical"
+                android:textColor="#1ED760"
+                android:textSize="13sp"
+                android:textStyle="bold"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/layoutControls"
+                tools:text="A tocar no Web Player (Firefox)" />
 
-        <!-- Cartão "Next in queue" (o Spotify mostra Lyrics aqui, mas a Web API não tem letras) -->
+        <!-- Fila de reprodução -->
         <androidx.cardview.widget.CardView
-            android:id="@+id/cardQueue"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="28dp"
-            app:cardBackgroundColor="#33FFFFFF"
-            app:cardCornerRadius="12dp"
-            app:cardElevation="0dp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/textDevice">
+                android:id="@+id/cardQueue"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="30dp"
+                app:cardBackgroundColor="#33474747"
+                app:cardCornerRadius="18dp"
+                app:cardElevation="2dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/textDevice">
 
             <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:padding="16dp">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Next in queue"
-                    android:textColor="#FFFFFF"
-                    android:textSize="16sp"
-                    android:textStyle="bold" />
-
-                <TextView
-                    android:id="@+id/textQueue"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
-                    android:lineSpacingExtra="4dp"
-                    android:textColor="#B3FFFFFF"
-                    android:textSize="14sp"
-                    tools:text="1. Reborn — KIDS SEE GHOSTS\n2. 4th Dimension — KIDS SEE GHOSTS" />
+                    android:orientation="vertical"
+                    android:padding="20dp">
+
+                <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="A seguir na fila"
+                        android:textColor="#FFFFFF"
+                        android:textSize="18sp"
+                        android:textStyle="bold" />
+
+                <TextView
+                        android:id="@+id/textQueue"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="12dp"
+                        android:lineSpacingExtra="5dp"
+                        android:textColor="#D0D0D0"
+                        android:textSize="14sp"
+                        tools:text="1. MOLICEIRO — ICARO" />
+
             </LinearLayout>
+
         </androidx.cardview.widget.CardView>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
+
 </androidx.core.widget.NestedScrollView>

@@ -73,6 +73,55 @@ public class SearchFragment extends BaseFragment {
         textEmpty = findByName(view, "textSearchEmpty");
         EditText editSearch = findByName(view, "editSearch");
 
+        View layoutExploreGenres = findByName(view, "layoutExploreGenres");
+
+        if (editSearch != null) {
+
+            String[][] genres = {
+                    {"genrePop", "pop"},
+                    {"genreHipHop", "hip hop"},
+                    {"genreRock", "rock"},
+                    {"genreElectronic", "electronic"},
+                    {"genreRelax", "chill"},
+                    {"genreDiscover", "indie"}
+            };
+
+            for (String[] genre : genres) {
+                View card = findByName(view, genre[0]);
+
+                if (card != null) {
+                    card.setOnClickListener(v -> {
+                        editSearch.setText(genre[1]);
+                        editSearch.setSelection(editSearch.getText().length());
+                    });
+                }
+            }
+
+            editSearch.addTextChangedListener(new TextWatcher() {
+                @Override
+                public void beforeTextChanged(
+                        CharSequence s, int start, int count, int after) {
+                }
+
+                @Override
+                public void onTextChanged(
+                        CharSequence s, int start, int before, int count) {
+
+                    boolean empty = s.toString().trim().isEmpty();
+
+                    if (layoutExploreGenres != null) {
+                        layoutExploreGenres.setVisibility(
+                                empty ? View.VISIBLE : View.GONE
+                        );
+                    }
+                }
+
+                @Override
+                public void afterTextChanged(Editable s) {
+                }
+            });
+        }
+
         RecyclerView rvTracks = findByName(view, "recyclerViewSearchTracks");
         if (rvTracks != null) {
             rvTracks.setLayoutManager(new LinearLayoutManager(getContext()));
