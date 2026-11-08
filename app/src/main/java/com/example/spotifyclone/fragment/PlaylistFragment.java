@@ -342,8 +342,73 @@ public class PlaylistFragment extends BaseFragment {
 
     private void playTrack(Track track) {
         MainActivity activity = main();
-        if (activity != null) {
-            activity.playTrack(track, null);
+
+        if (activity == null || track == null) {
+            return;
+        }
+
+        int position = tracks.indexOf(track);
+
+        if (position < 0) {
+            return;
+        }
+
+        activity.updateMiniPlayerInstantly(
+                track.id,
+                track.name,
+                track.artistNames(),
+                track.coverUrl()
+        );
+
+        ApiCallback callback = new ApiCallback() {
+            @Override
+            protected void onSuccess(String body) {
+                new Handler(Looper.getMainLooper()).postDelayed(() -> {
+                    MainActivity a = main();
+                    if (a != null) {
+                        a.syncMiniPlayer(token());
+                    }
+                }, 1000);
+            }
+
+            @Override
+            protected void onError(int code, String body) {
+                super.onError(code, body);
+
+                if (alive()) {
+                    Toast.makeText(
+                            requireContext(),
+                            "Não foi possível tocar (" + code + ")",
+                            Toast.LENGTH_LONG
+                    ).show();
+                }
+            }
+        };
+
+        if (likedSongs) {
+            List<String> uris = new ArrayList<>();
+
+            for (Track t : tracks) {
+                uris.add(t.uriOrBuild());
+            }
+
+            PlayerApiClient.startUrisPlayback(
+                    token(),
+                    uris,
+                    position,
+                    deviceId(),
+                    callback
+            );
+        } else {
+            String contextUri = "spotify:playlist:" + playlistId;
+
+            PlayerApiClient.startContextPlayback(
+                    token(),
+                    contextUri,
+                    position,
+                    deviceId(),
+                    callback
+            );
         }
     }
 

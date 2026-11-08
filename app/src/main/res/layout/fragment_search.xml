@@ -1,6 +1,74 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent">
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:orientation="vertical"
+              android:background="#121212"
+              android:padding="16dp">
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+    <TextView
+            android:id="@+id/textSearchTitle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Pesquisar"
+            android:textColor="#FFFFFF"
+            android:textSize="26sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="16dp" />
+
+    <EditText
+            android:id="@+id/editSearch"
+            android:layout_width="match_parent"
+            android:layout_height="52dp"
+            android:hint="Músicas, Artistas, Albuns..."
+            android:inputType="text"
+            android:singleLine="true"
+            android:padding="12dp"
+            android:backgroundTint="#1DB954"
+            android:textColor="#FFFFFF"
+            android:textColorHint="#B3B3B3"
+            android:layout_marginBottom="16dp" />
+
+    <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Músicas"
+            android:textColor="#FFFFFF"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="8dp" />
+
+    <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recyclerViewSearchTracks"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1" />
+
+    <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Artistas, Albuns e Playlists"
+            android:textColor="#FFFFFF"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:layout_marginTop="12dp"
+            android:layout_marginBottom="8dp" />
+
+    <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recyclerViewSearchMedia"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1" />
+
+    <TextView
+            android:id="@+id/textSearchEmpty"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Nenhum resultado encontrado"
+            android:textColor="#B3B3B3"
+            android:textSize="14sp"
+            android:gravity="center"
+            android:visibility="gone"
+            android:padding="12dp" />
+
+</LinearLayout>

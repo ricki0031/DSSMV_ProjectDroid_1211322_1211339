@@ -1,96 +1,106 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:background="?android:attr/selectableItemBackground"
-    android:clickable="true"
-    android:focusable="true"
-    android:padding="12dp">
-    <!-- O "selectableItemBackground" cria aquele efeito de "onda" (ripple) ao clicar na música -->
-
-    <!-- Número da Faixa -->
-    <TextView
-        android:id="@+id/textTrackNumber"
-        android:layout_width="32dp"
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textAlignment="center"
-        android:textColor="#B3B3B3"
-        android:textSize="16sp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        tools:text="1" />
+        android:minHeight="64dp"
+        android:paddingStart="12dp"
+        android:paddingEnd="12dp"
+        android:paddingTop="8dp"
+        android:paddingBottom="8dp"
+        android:background="?android:attr/selectableItemBackground"
+        android:clickable="true"
+        android:focusable="true">
 
-    <!-- Capa da Música (Visível apenas em Playlists e Pesquisa) -->
+    <!-- Espaço fixo para o número ou para a capa -->
+    <Space
+            android:id="@+id/trackLeadingSpace"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent" />
+
+    <!-- Número da faixa: usado nos álbuns -->
+    <TextView
+            android:id="@+id/textTrackNumber"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:gravity="center"
+            android:textColor="#B3B3B3"
+            android:textSize="16sp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent" />
+
+    <!-- Capa da música: usada nas playlists -->
     <ImageView
-        android:id="@+id/imageTrackCover"
-        android:layout_width="40dp"
-        android:layout_height="40dp"
-        android:scaleType="centerCrop"
-        android:visibility="gone"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        tools:srcCompat="@tools:sample/backgrounds/scenic" />
+            android:id="@+id/imageTrackCover"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:scaleType="centerCrop"
+            android:visibility="gone"
+            android:contentDescription="Capa da música"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent" />
 
-    <!-- Nome da Faixa -->
+    <!-- Duração da música -->
     <TextView
-        android:id="@+id/textTrackName"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:layout_marginEnd="16dp"
-        android:ellipsize="end"
-        android:maxLines="1"
-        android:textColor="#FFFFFF"
-        android:textSize="16sp"
-        app:layout_constraintEnd_toStartOf="@+id/textTrackDuration"
-        app:layout_constraintStart_toEndOf="@+id/textTrackNumber"
-        app:layout_constraintTop_toTopOf="parent"
-        tools:text="Global Warming (feat. Sensato)" />
+            android:id="@+id/textTrackDuration"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:minWidth="44dp"
+            android:gravity="end"
+            android:textColor="#B3B3B3"
+            android:textSize="14sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent" />
 
-    <!-- Nome do Artista (aparece abaixo do nome da faixa) -->
-    <TextView
-        android:id="@+id/textTrackArtist"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="2dp"
-        android:ellipsize="end"
-        android:maxLines="1"
-        android:textColor="#B3B3B3"
-        android:textSize="14sp"
-        app:layout_constraintEnd_toEndOf="@+id/textTrackName"
-        app:layout_constraintStart_toStartOf="@+id/textTrackName"
-        app:layout_constraintTop_toBottomOf="@+id/textTrackName"
-        tools:text="Pitbull" />
-
-    <!-- Botão "Mais opções" (Os 3 pontinhos) -->
+    <!-- Menu de opções -->
     <ImageView
-        android:id="@+id/btnTrackMore"
-        android:layout_width="32dp"
-        android:layout_height="32dp"
-        android:background="?attr/selectableItemBackgroundBorderless"
-        android:padding="8dp"
-        android:src="@android:drawable/ic_menu_more"
-        android:visibility="gone"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:tint="#B3B3B3" />
+            android:id="@+id/btnTrackMore"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:padding="8dp"
+            android:src="@android:drawable/ic_menu_more"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:visibility="gone"
+            android:contentDescription="Mais opções"
+            app:tint="#B3B3B3"
+            app:layout_constraintEnd_toStartOf="@id/textTrackDuration"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent" />
 
-    <!-- Duração da Faixa -->
+    <!-- Título: começa sempre depois do espaço fixo -->
     <TextView
-        android:id="@+id/textTrackDuration"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textColor="#B3B3B3"
-        android:textSize="14sp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        tools:text="1:25" />
+            android:id="@+id/textTrackName"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="12dp"
+            android:layout_marginEnd="12dp"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:textColor="#FFFFFF"
+            android:textSize="16sp"
+            app:layout_constraintStart_toEndOf="@id/trackLeadingSpace"
+            app:layout_constraintEnd_toStartOf="@id/btnTrackMore"
+            app:layout_constraintTop_toTopOf="parent" />
+
+    <!-- Artista -->
+    <TextView
+            android:id="@+id/textTrackArtist"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:textColor="#B3B3B3"
+            android:textSize="14sp"
+            app:layout_constraintStart_toStartOf="@id/textTrackName"
+            app:layout_constraintEnd_toEndOf="@id/textTrackName"
+            app:layout_constraintTop_toBottomOf="@id/textTrackName" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -270,16 +270,34 @@ public class MainActivity extends AppCompatActivity {
         String token = Session.getAccessToken(this);
         updateMiniPlayerInstantly(track.id, track.name, track.artistNames(), track.coverUrl());
 
-        PlayerApiClient.startResumePlayback(token, track.id, globalDeviceId, new ApiCallback() {
+        PlayerApiClient.startResumePlayback(token, track.id, null, new ApiCallback() {
             @Override
             protected void onSuccess(String body) {
-                new Handler(Looper.getMainLooper()).postDelayed(() -> syncMiniPlayer(token), 800);
+                android.util.Log.e(
+                        "SPOTIFY_PLAYBACK",
+                        "Pedido de reprodução aceite pelo Spotify"
+                );
+
+                new Handler(Looper.getMainLooper()).postDelayed(
+                        () -> syncMiniPlayer(token),
+                        800
+                );
             }
 
             @Override
             protected void onError(int code, String body) {
                 super.onError(code, body);
-                Toast.makeText(MainActivity.this, "Erro ao tocar (" + code + ")", Toast.LENGTH_SHORT).show();
+
+                android.util.Log.e(
+                        "SPOTIFY_PLAYBACK",
+                        "Erro HTTP " + code + " | " + body
+                );
+
+                Toast.makeText(
+                        MainActivity.this,
+                        "Erro ao tocar: HTTP " + code,
+                        Toast.LENGTH_LONG
+                ).show();
             }
         });
     }

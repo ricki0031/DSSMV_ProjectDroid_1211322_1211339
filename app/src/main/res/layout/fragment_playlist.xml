@@ -148,5 +148,7 @@
             android:layout_margin="16dp"
             android:indeterminateTint="#1ED760"
             android:visibility="gone" />
+
+
     </LinearLayout>
 </androidx.core.widget.NestedScrollView>
