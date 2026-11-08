@@ -1,0 +1,14 @@
+# Configuracoes locais
+/local.properties
+
+# Gradle
+.gradle/
+**/build/
+
+# IntelliJ IDEA
+.idea/
+*.iml
+
+# Sistema operativo
+.DS_Store
+Thumbs.db
