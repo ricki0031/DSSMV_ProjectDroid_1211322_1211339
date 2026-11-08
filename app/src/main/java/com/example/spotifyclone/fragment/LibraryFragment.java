@@ -85,6 +85,25 @@ public class LibraryFragment extends Fragment {
             fetchSavedAlbums(accessToken);
             fetchPlaylists(accessToken);
         }
+        View buttonLikedSongs = view.findViewById(R.id.buttonLikedSongs);
+
+        if (buttonLikedSongs != null) {
+            buttonLikedSongs.setOnClickListener(v -> {
+                Bundle args = new Bundle();
+                args.putString("ACCESS_TOKEN", accessToken);
+                args.putBoolean(PlaylistFragment.ARG_LIKED_SONGS, true);
+
+                PlaylistFragment fragment = new PlaylistFragment();
+                fragment.setArguments(args);
+
+                requireActivity()
+                        .getSupportFragmentManager()
+                        .beginTransaction()
+                        .replace(R.id.fragment_container, fragment)
+                        .addToBackStack(null)
+                        .commit();
+            });
+        }
 
         View buttonCreatePlaylist = view.findViewById(R.id.buttonCreatePlaylist);
 

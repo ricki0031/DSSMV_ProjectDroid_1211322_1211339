@@ -38,6 +38,9 @@ import com.example.spotifyclone.utils.PKCEUtil;
 import com.example.spotifyclone.utils.PlaylistPicker;
 import com.example.spotifyclone.utils.Session;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+import android.net.ConnectivityManager;
+import android.net.Network;
+import android.net.NetworkCapabilities;
 
 import java.util.Collections;
 
@@ -78,6 +81,14 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void restoreOrAuthenticate() {
+        if (!hasInternetConnection()) {
+            Toast.makeText(
+                    this,
+                    "Sem ligação à Internet. Verifica o Wi-Fi ou os dados móveis.",
+                    Toast.LENGTH_LONG
+            ).show();
+            return;
+        }
         String savedToken = Session.getAccessToken(this);
         String refreshToken = Session.getRefreshToken(this);
 
@@ -475,4 +486,27 @@ public class MainActivity extends AppCompatActivity {
             syncMiniPlayer(token);
         }
     }
+private boolean hasInternetConnection() {
+    ConnectivityManager manager =
+            (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE);
+
+    if (manager == null) {
+        return false;
+    }
+
+    Network network = manager.getActiveNetwork();
+
+    if (network == null) {
+        return false;
+    }
+
+    NetworkCapabilities capabilities =
+            manager.getNetworkCapabilities(network);
+
+    return capabilities != null
+            && capabilities.hasCapability(
+            NetworkCapabilities.NET_CAPABILITY_INTERNET)
+            && capabilities.hasCapability(
+            NetworkCapabilities.NET_CAPABILITY_VALIDATED);
 }
+    }
