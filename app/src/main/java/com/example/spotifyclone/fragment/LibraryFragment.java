@@ -2,11 +2,16 @@
 package com.example.spotifyclone.fragment;
 
 import android.app.AlertDialog;
+import android.content.res.ColorStateList;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -42,8 +47,24 @@ public class LibraryFragment extends Fragment {
 
     private RecyclerView recyclerViewGrid;
     private RecyclerView recyclerViewPlaylists;
+
+    private TextView textPlaylistsTitle;
+    private TextView textAlbumsTitle;
+
+    private Button buttonFilterPlaylists;
+    private Button buttonFilterAlbums;
+    private ImageButton buttonLibraryViewMode;
+
     private MediaCardAdapter playlistAdapter;
+    private AlbumAdapter albumAdapter;
+
+    private final List<MediaItem> playlists = new ArrayList<>();
+    private final List<Album> albums = new ArrayList<>();
+
     private String accessToken;
+
+    private boolean showingPlaylists = true;
+    private boolean gridMode = false;
 
     @Nullable
     @Override
@@ -52,46 +73,53 @@ public class LibraryFragment extends Fragment {
             @Nullable ViewGroup container,
             @Nullable Bundle savedInstanceState
     ) {
-        View view = inflater.inflate(R.layout.fragment_library, container, false);
+        View view = inflater.inflate(
+                R.layout.fragment_library,
+                container,
+                false
+        );
 
         recyclerViewGrid = view.findViewById(R.id.recyclerViewLibrary);
         recyclerViewPlaylists = view.findViewById(R.id.recyclerViewPlaylists);
 
-        recyclerViewGrid.setLayoutManager(
-                new GridLayoutManager(requireContext(), 2)
-        );
+        textPlaylistsTitle = view.findViewById(R.id.textPlaylistsTitle);
+        textAlbumsTitle = view.findViewById(R.id.textAlbumsTitle);
 
-        recyclerViewPlaylists.setLayoutManager(
-                new LinearLayoutManager(requireContext())
-        );
-
-        playlistAdapter = new MediaCardAdapter(
-                new ArrayList<>(),
-                MediaCardAdapter.STYLE_LIST,
-                item -> {
-                    if (MediaItem.TYPE_PLAYLIST.equals(item.type)) {
-                        openPlaylist(item.id);
-                    }
-                }
-        );
-
-        recyclerViewPlaylists.setAdapter(playlistAdapter);
+        buttonFilterPlaylists = view.findViewById(R.id.buttonFilterPlaylists);
+        buttonFilterAlbums = view.findViewById(R.id.buttonFilterAlbums);
+        buttonLibraryViewMode = view.findViewById(R.id.buttonLibraryViewMode);
 
         if (getArguments() != null) {
             accessToken = getArguments().getString("ACCESS_TOKEN");
         }
 
-        if (accessToken != null && !accessToken.isEmpty()) {
-            fetchSavedAlbums(accessToken);
-            fetchPlaylists(accessToken);
-        }
+        buttonFilterPlaylists.setOnClickListener(v -> {
+            showingPlaylists = true;
+            gridMode = false;
+            updateLibraryView();
+        });
+
+        buttonFilterAlbums.setOnClickListener(v -> {
+            showingPlaylists = false;
+            gridMode = true;
+            updateLibraryView();
+        });
+
+        buttonLibraryViewMode.setOnClickListener(v -> {
+            gridMode = !gridMode;
+            updateLibraryView();
+        });
+
         View buttonLikedSongs = view.findViewById(R.id.buttonLikedSongs);
 
         if (buttonLikedSongs != null) {
             buttonLikedSongs.setOnClickListener(v -> {
                 Bundle args = new Bundle();
                 args.putString("ACCESS_TOKEN", accessToken);
-                args.putBoolean(PlaylistFragment.ARG_LIKED_SONGS, true);
+                args.putBoolean(
+                        PlaylistFragment.ARG_LIKED_SONGS,
+                        true
+                );
 
                 PlaylistFragment fragment = new PlaylistFragment();
                 fragment.setArguments(args);
@@ -113,7 +141,96 @@ public class LibraryFragment extends Fragment {
             );
         }
 
+        updateLibraryView();
+
+        if (accessToken != null && !accessToken.isEmpty()) {
+            fetchSavedAlbums(accessToken);
+            fetchPlaylists(accessToken);
+        }
+
         return view;
+    }
+
+    private void updateLibraryView() {
+        if (recyclerViewGrid == null || recyclerViewPlaylists == null) {
+            return;
+        }
+
+        buttonFilterPlaylists.setBackgroundTintList(
+                ColorStateList.valueOf(
+                        Color.parseColor(
+                                showingPlaylists ? "#1DB954" : "#333333"
+                        )
+                )
+        );
+
+        buttonFilterAlbums.setBackgroundTintList(
+                ColorStateList.valueOf(
+                        Color.parseColor(
+                                showingPlaylists ? "#333333" : "#1DB954"
+                        )
+                )
+        );
+
+        if (showingPlaylists) {
+            textPlaylistsTitle.setVisibility(View.VISIBLE);
+            textAlbumsTitle.setVisibility(View.GONE);
+
+            recyclerViewPlaylists.setVisibility(View.VISIBLE);
+            recyclerViewGrid.setVisibility(View.GONE);
+
+            if (gridMode) {
+                recyclerViewPlaylists.setLayoutManager(
+                        new GridLayoutManager(requireContext(), 2)
+                );
+
+                playlistAdapter = new MediaCardAdapter(
+                        new ArrayList<>(playlists),
+                        MediaCardAdapter.STYLE_CARD,
+                        item -> {
+                            if (MediaItem.TYPE_PLAYLIST.equals(item.type)) {
+                                openPlaylist(item.id);
+                            }
+                        }
+                );
+            } else {
+                recyclerViewPlaylists.setLayoutManager(
+                        new LinearLayoutManager(requireContext())
+                );
+
+                playlistAdapter = new MediaCardAdapter(
+                        new ArrayList<>(playlists),
+                        MediaCardAdapter.STYLE_LIST,
+                        item -> {
+                            if (MediaItem.TYPE_PLAYLIST.equals(item.type)) {
+                                openPlaylist(item.id);
+                            }
+                        }
+                );
+            }
+
+            recyclerViewPlaylists.setAdapter(playlistAdapter);
+
+        } else {
+            textPlaylistsTitle.setVisibility(View.GONE);
+            textAlbumsTitle.setVisibility(View.VISIBLE);
+
+            recyclerViewPlaylists.setVisibility(View.GONE);
+            recyclerViewGrid.setVisibility(View.VISIBLE);
+
+            recyclerViewGrid.setLayoutManager(
+                    gridMode
+                            ? new GridLayoutManager(requireContext(), 2)
+                            : new LinearLayoutManager(requireContext())
+            );
+
+            albumAdapter = new AlbumAdapter(
+                    new ArrayList<>(albums),
+                    album -> openAlbum(album, accessToken)
+            );
+
+            recyclerViewGrid.setAdapter(albumAdapter);
+        }
     }
 
     private void fetchPlaylists(String token) {
@@ -138,7 +255,8 @@ public class LibraryFragment extends Fragment {
                             @NonNull Response response
                     ) throws IOException {
                         try (Response ignored = response) {
-                            if (!response.isSuccessful() || response.body() == null) {
+                            if (!response.isSuccessful()
+                                    || response.body() == null) {
                                 showPlaylistMessage(
                                         "Erro ao carregar playlists: HTTP "
                                                 + response.code()
@@ -148,9 +266,11 @@ public class LibraryFragment extends Fragment {
 
                             String json = response.body().string();
 
-                            Type type = new TypeToken<Page<Playlist>>() {}.getType();
+                            Type type =
+                                    new TypeToken<Page<Playlist>>() {}.getType();
 
-                            Page<Playlist> page = new Gson().fromJson(json, type);
+                            Page<Playlist> page =
+                                    new Gson().fromJson(json, type);
 
                             List<MediaItem> items = new ArrayList<>();
 
@@ -166,8 +286,82 @@ public class LibraryFragment extends Fragment {
 
                             if (getActivity() != null) {
                                 getActivity().runOnUiThread(() -> {
-                                    if (isAdded() && playlistAdapter != null) {
-                                        playlistAdapter.submit(items);
+                                    if (!isAdded()) {
+                                        return;
+                                    }
+
+                                    playlists.clear();
+                                    playlists.addAll(items);
+
+                                    if (showingPlaylists) {
+                                        updateLibraryView();
+                                    }
+                                });
+                            }
+                        }
+                    }
+                }
+        );
+    }
+
+    private void fetchSavedAlbums(String token) {
+        AlbumApiClient.getUserSavedAlbums(
+                token,
+                new Callback() {
+                    @Override
+                    public void onFailure(
+                            @NonNull Call call,
+                            @NonNull IOException e
+                    ) {
+                        showPlaylistMessage(
+                                "Não foi possível carregar os álbuns"
+                        );
+                    }
+
+                    @Override
+                    public void onResponse(
+                            @NonNull Call call,
+                            @NonNull Response response
+                    ) throws IOException {
+                        try (Response ignored = response) {
+                            if (!response.isSuccessful()
+                                    || response.body() == null) {
+                                showPlaylistMessage(
+                                        "Erro ao carregar álbuns: HTTP "
+                                                + response.code()
+                                );
+                                return;
+                            }
+
+                            SavedAlbumsResponse savedResponse =
+                                    new Gson().fromJson(
+                                            response.body().string(),
+                                            SavedAlbumsResponse.class
+                                    );
+
+                            List<Album> loadedAlbums = new ArrayList<>();
+
+                            if (savedResponse != null
+                                    && savedResponse.items != null) {
+                                for (SavedAlbumsResponse.SavedAlbumItem item
+                                        : savedResponse.items) {
+                                    if (item != null && item.album != null) {
+                                        loadedAlbums.add(item.album);
+                                    }
+                                }
+                            }
+
+                            if (getActivity() != null) {
+                                getActivity().runOnUiThread(() -> {
+                                    if (!isAdded()) {
+                                        return;
+                                    }
+
+                                    albums.clear();
+                                    albums.addAll(loadedAlbums);
+
+                                    if (!showingPlaylists) {
+                                        updateLibraryView();
                                     }
                                 });
                             }
@@ -227,7 +421,6 @@ public class LibraryFragment extends Fragment {
                                             showPlaylistMessage(
                                                     "Playlist criada com sucesso!"
                                             );
-
                                             fetchPlaylists(accessToken);
                                         } else {
                                             showPlaylistMessage(
@@ -257,68 +450,6 @@ public class LibraryFragment extends Fragment {
                 ).show();
             }
         });
-    }
-
-    private void fetchSavedAlbums(String token) {
-        AlbumApiClient.getUserSavedAlbums(
-                token,
-                new Callback() {
-                    @Override
-                    public void onFailure(
-                            @NonNull Call call,
-                            @NonNull IOException e
-                    ) {
-                        showPlaylistMessage(
-                                "Não foi possível carregar os álbuns"
-                        );
-                    }
-
-                    @Override
-                    public void onResponse(
-                            @NonNull Call call,
-                            @NonNull Response response
-                    ) throws IOException {
-                        try (Response ignored = response) {
-                            if (!response.isSuccessful() || response.body() == null) {
-                                return;
-                            }
-
-                            SavedAlbumsResponse savedResponse =
-                                    new Gson().fromJson(
-                                            response.body().string(),
-                                            SavedAlbumsResponse.class
-                                    );
-
-                            List<Album> albums = new ArrayList<>();
-
-                            if (savedResponse != null
-                                    && savedResponse.items != null) {
-                                for (SavedAlbumsResponse.SavedAlbumItem item
-                                        : savedResponse.items) {
-                                    if (item != null && item.album != null) {
-                                        albums.add(item.album);
-                                    }
-                                }
-                            }
-
-                            if (getActivity() != null) {
-                                getActivity().runOnUiThread(() -> {
-                                    if (!isAdded() || recyclerViewGrid == null) {
-                                        return;
-                                    }
-
-                                    AlbumAdapter adapter = new AlbumAdapter(
-                                            albums,
-                                            album -> openAlbum(album, token)
-                                    );
-
-                                    recyclerViewGrid.setAdapter(adapter);
-                                });
-                            }
-                        }
-                    }
-                }
-        );
     }
 
     private void openAlbum(Album album, String token) {
