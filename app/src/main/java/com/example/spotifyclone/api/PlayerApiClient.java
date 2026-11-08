@@ -108,6 +108,27 @@ public class PlayerApiClient {
         client.newCall(request).enqueue(callback);
     }
 
+    // Toca um contexto (ex: álbum) a começar numa música específica, identificada pelo URI
+    public static void startContextPlaybackAtTrack(String accessToken, String contextUri, String trackUri, String deviceId, Callback callback) {
+        String jsonBody = "{\"context_uri\": \"" + contextUri + "\", \"offset\": {\"uri\": \"" + trackUri + "\"}}";
+
+        MediaType JSON = MediaType.parse("application/json; charset=utf-8");
+        RequestBody body = RequestBody.create(jsonBody, JSON);
+
+        String url = BASE_URL + "/me/player/play";
+        if (deviceId != null && !deviceId.isEmpty()) {
+            url += "?device_id=" + deviceId;
+        }
+
+        Request request = new Request.Builder()
+                .url(url)
+                .addHeader("Authorization", "Bearer " + accessToken)
+                .put(body)
+                .build();
+
+        client.newCall(request).enqueue(callback);
+    }
+
     // Usa o MESMO endpoint (/me/player/play), mas envia uma lista de "uris" (para tocar as Liked Songs todas)
     public static void startUrisPlayback(String accessToken, List<String> uris, int offsetPosition, String deviceId, Callback callback) {
         StringBuilder urisJson = new StringBuilder("[");

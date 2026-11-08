@@ -42,12 +42,15 @@ import android.net.ConnectivityManager;
 import android.net.Network;
 import android.net.NetworkCapabilities;
 
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
     public static final String SHARED_PREFS = Session.PREFS;
     public static final String CODE_VERIFIER_KEY = "code_verifier";
+    public static final String EXTRA_OPEN_ALBUM_ID = "OPEN_ALBUM_ID";
 
     private static final String REQUIRED_SCOPES =
             "user-modify-playback-state user-read-playback-state user-read-currently-playing " +
@@ -157,6 +160,14 @@ public class MainActivity extends AppCompatActivity {
         super.onNewIntent(intent);
         setIntent(intent);
         handleAuthRedirect(intent);
+
+        String albumId = intent.getStringExtra(EXTRA_OPEN_ALBUM_ID);
+        if (albumId != null) {
+            MediaItem album = new MediaItem();
+            album.type = MediaItem.TYPE_ALBUM;
+            album.id = albumId;
+            openMedia(album);
+        }
     }
 
     private void handleAuthRedirect(Intent intent) {
@@ -273,7 +284,11 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    public void playTrack(Track track, String contextUri) {
+    /**
+     * Toca uma música dentro do seu álbum, para a fila e o shuffle terem as faixas seguintes.
+     * Um álbum de uma só música não tem seguintes, por isso usa-se "siblings" (lista que contém a música).
+     */
+    public void playTrack(Track track, List<Track> siblings) {
         if (track == null) {
             return;
         }
@@ -281,7 +296,7 @@ public class MainActivity extends AppCompatActivity {
         String token = Session.getAccessToken(this);
         updateMiniPlayerInstantly(track.id, track.name, track.artistNames(), track.coverUrl());
 
-        PlayerApiClient.startResumePlayback(token, track.id, null, new ApiCallback() {
+        ApiCallback callback = new ApiCallback() {
             @Override
             protected void onSuccess(String body) {
                 android.util.Log.e(
@@ -310,7 +325,18 @@ public class MainActivity extends AppCompatActivity {
                         Toast.LENGTH_LONG
                 ).show();
             }
-        });
+        };
+
+        if (track.album != null && track.album.id != null && track.album.totalTracks > 1) {
+            String albumUri = "spotify:album:" + track.album.id;
+            PlayerApiClient.startContextPlaybackAtTrack(token, albumUri, track.uriOrBuild(), null, callback);
+        } else {
+            List<String> uris = new ArrayList<>();
+            for (Track sibling : siblings) {
+                uris.add(sibling.uriOrBuild());
+            }
+            PlayerApiClient.startUrisPlayback(token, uris, siblings.indexOf(track), null, callback);
+        }
     }
 
     public void updateMiniPlayerInstantly(String trackId, String title, String artist, String coverUrl) {

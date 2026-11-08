@@ -194,7 +194,7 @@ public class SearchFragment extends BaseFragment {
         } else {
             MainActivity activity = main();
             if (activity != null) {
-                activity.playTrack(track, null);
+                activity.playTrack(track, tracks);
             }
         }
     }

@@ -95,8 +95,9 @@ public class AlbumFragment extends Fragment {
                                         targetDevice = ((MainActivity) getActivity()).globalDeviceId;
                                     }
 
-                                    // 2. Tocar a música no telemóvel ativo usando a nova API atualizada
-                                    PlayerApiClient.startResumePlayback(accessToken, track.id, targetDevice, new Callback() {
+                                    // 2. Tocar o álbum a partir desta música, para a fila e o shuffle terem as restantes faixas
+                                    String albumUri = "spotify:album:" + albumId;
+                                    PlayerApiClient.startContextPlaybackAtTrack(accessToken, albumUri, track.uriOrBuild(), targetDevice, new Callback() {
                                         @Override
                                         public void onFailure(@NonNull Call call, @NonNull IOException e) {
                                             System.out.println("Erro de Rede ao Tocar");

@@ -36,4 +36,27 @@
         <item name="android:clickable">true</item>
         <item name="android:focusable">true</item>
     </style>
+
+    <!-- Painel de opções da música (sobe a partir de baixo) -->
+    <style name="ThemeOverlay.SpotifyClone.BottomSheet" parent="ThemeOverlay.Material3.BottomSheetDialog">
+        <item name="bottomSheetStyle">@style/Widget.SpotifyClone.BottomSheet</item>
+    </style>
+
+    <style name="Widget.SpotifyClone.BottomSheet" parent="Widget.Material3.BottomSheet.Modal">
+        <item name="backgroundTint">#1F1F1F</item>
+    </style>
+
+    <style name="TrackOptionRow">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">60dp</item>
+        <item name="android:background">?attr/selectableItemBackground</item>
+        <item name="android:drawablePadding">20dp</item>
+        <item name="android:gravity">center_vertical</item>
+        <item name="android:paddingStart">20dp</item>
+        <item name="android:paddingEnd">20dp</item>
+        <item name="android:textColor">#FFFFFF</item>
+        <item name="android:textSize">16sp</item>
+        <item name="android:clickable">true</item>
+        <item name="android:focusable">true</item>
+    </style>
 </resources>

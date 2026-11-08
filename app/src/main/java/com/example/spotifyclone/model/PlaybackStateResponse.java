@@ -17,4 +17,13 @@ public class PlaybackStateResponse {
 
     @SerializedName("item")
     public Track item;
+
+    // Nulo quando a música foi iniciada sem contexto (lista de "uris", ex.: Liked Songs)
+    @SerializedName("context")
+    public PlaybackContext context;
+
+    public static class PlaybackContext {
+        @SerializedName("uri")
+        public String uri;
+    }
 }
