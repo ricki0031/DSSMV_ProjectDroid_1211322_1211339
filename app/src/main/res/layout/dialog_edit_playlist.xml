@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="20dp">
+
+    <ImageView
+        android:id="@+id/imageEditCover"
+        android:layout_width="140dp"
+        android:layout_height="140dp"
+        android:layout_gravity="center_horizontal"
+        android:background="#282828"
+        android:contentDescription="Mudar capa"
+        android:scaleType="centerCrop" />
+
+    <TextView
+        android:id="@+id/textChangeCover"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="8dp"
+        android:background="?attr/selectableItemBackground"
+        android:padding="6dp"
+        android:text="Mudar capa"
+        android:textStyle="bold" />
+
+    <EditText
+        android:id="@+id/editPlaylistName"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:hint="Nome"
+        android:inputType="textCapSentences"
+        android:maxLength="100"
+        android:singleLine="true" />
+
+    <EditText
+        android:id="@+id/editPlaylistDescription"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:hint="Descrição (opcional)"
+        android:inputType="textCapSentences|textMultiLine"
+        android:maxLength="300"
+        android:maxLines="4" />
+</LinearLayout>
