@@ -1,0 +1,30 @@
+@startuml
+'https://plantuml.com/sequence-diagram
+autonumber
+title US10 - Manage Favourite Songs (SD)
+
+actor User
+participant "PlayerActivity" as Player
+participant "LibraryApiClient" as Library
+participant "Spotify Web API" as Spotify
+
+User -> Player: tap the like button
+Player -> Player: toggleLike()
+
+alt the track is not saved
+    Player -> Library: saveItemsToLibrary(token, uris, callback)
+    Library -> Spotify: PUT /me/library
+else the track is already saved
+    Player -> Library: removeItemsFromLibrary(token, uris, callback)
+    Library -> Spotify: DELETE /me/library
+end
+
+Spotify --> Player: success
+Player --> User: show the confirmation message
+Player -> Player: refreshLiked()
+Player -> Library: checkUserSavedItems(token, uris, callback)
+Library -> Spotify: GET /me/library/contains
+Spotify --> Player: saved state
+Player --> User: update the like button
+
+@enduml

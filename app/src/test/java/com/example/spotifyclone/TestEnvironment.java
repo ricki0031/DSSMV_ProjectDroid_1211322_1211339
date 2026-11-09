@@ -34,7 +34,11 @@ public final class TestEnvironment {
     private TestEnvironment() {}
 
     public static TokenResponse token(String access, @Nullable String refresh, int expiresIn, String scope) {
-        String refreshJson = refresh == null ? "" : "\"refresh_token\":\"" + refresh + "\",";
+        String refreshJson = "";
+        if (refresh != null) {
+            refreshJson = "\"refresh_token\":\"" + refresh + "\",";
+        }
+
         return new Gson().fromJson(
                 "{\"access_token\":\"" + access + "\"," + refreshJson
                         + "\"expires_in\":" + expiresIn + ",\"scope\":\"" + scope + "\"}",

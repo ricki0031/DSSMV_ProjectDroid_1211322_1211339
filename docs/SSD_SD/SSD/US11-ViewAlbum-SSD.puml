@@ -1,0 +1,12 @@
+@startuml
+'https://plantuml.com/sequence-diagram
+autonumber
+title US11 - View Album (SSD)
+
+actor User
+participant "System" as System
+
+User -> System: Select an album
+System --> User: Show the album details and tracks
+
+@enduml

@@ -20,9 +20,23 @@ public class TokenResponse {
     private String scope;
 
     // Getters para acedermos aos valores mais tarde
-    public String getAccessToken() { return accessToken; }
-    public String getTokenType() { return tokenType; }
-    public int getExpiresIn() { return expiresIn; }
-    public String getRefreshToken() { return refreshToken; }
-    public String getScope() { return scope; }
+    public String getAccessToken() {
+        return accessToken;
+    }
+
+    public String getTokenType() {
+        return tokenType;
+    }
+
+    public int getExpiresIn() {
+        return expiresIn;
+    }
+
+    public String getRefreshToken() {
+        return refreshToken;
+    }
+
+    public String getScope() {
+        return scope;
+    }
 }

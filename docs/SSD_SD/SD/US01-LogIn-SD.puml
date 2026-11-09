@@ -1,0 +1,31 @@
+@startuml
+'https://plantuml.com/sequence-diagram
+autonumber
+title US01 - Log In with Spotify (SD)
+
+actor User
+participant "MainActivity" as Main
+participant "PKCEUtil" as PKCE
+participant "Session" as Session
+participant "SpotifyAuthClient" as Auth
+participant "Spotify Accounts" as Spotify
+
+User -> Main: open the application
+Main -> Session: getAccessToken()
+Session --> Main: no valid session
+Main -> PKCE: generateCodeVerifier()
+PKCE --> Main: codeVerifier
+Main -> PKCE: generateCodeChallenge(codeVerifier)
+PKCE --> Main: codeChallenge
+Main -> Spotify: open /authorize in the browser
+User -> Spotify: log in and authorize
+Spotify --> Main: onNewIntent(spotifyclone://callback?code=...)
+Main -> Auth: getAccessToken(clientId, code, redirectUri, codeVerifier, callback)
+Auth -> Spotify: POST /api/token
+Spotify --> Auth: tokens
+Auth --> Main: onSuccess(body)
+Main -> Session: save(tokenResponse)
+Main -> Main: onAuthenticated(token)
+Main --> User: show HomeFragment
+
+@enduml

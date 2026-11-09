@@ -1,0 +1,14 @@
+@startuml
+'https://plantuml.com/sequence-diagram
+autonumber
+title US08 - Add Track to Playlist (SSD)
+
+actor User
+participant "System" as System
+
+User -> System: Request to add a track to a playlist
+System --> User: Show the editable playlists
+User -> System: Select a playlist
+System --> User: Track added to the playlist
+
+@enduml

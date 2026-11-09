@@ -1,0 +1,29 @@
+@startuml
+'https://plantuml.com/sequence-diagram
+autonumber
+title US05 - Create Playlist (SD)
+
+actor User
+participant "LibraryFragment" as Library
+participant "PlaylistApiClient" as Client
+participant "Spotify Web API" as Spotify
+
+User -> Library: tap the create playlist button
+Library -> Library: showCreatePlaylistDialog()
+Library --> User: ask for the playlist name
+User -> Library: submit the name
+
+alt name is empty
+    Library --> User: show "Introduza um nome para a playlist"
+else valid name
+    Library -> Client: createPlaylist(token, name, description, false, callback)
+    Client -> Spotify: POST /me/playlists
+    Spotify --> Library: created playlist
+    Library --> User: show "Playlist criada com sucesso!"
+    Library -> Client: getCurrentUserPlaylists(token, 50, 0, callback)
+    Client -> Spotify: GET /me/playlists
+    Spotify --> Library: updated playlists
+    Library --> User: show the updated list
+end
+
+@enduml

@@ -1,0 +1,135 @@
+@startuml
+'https://plantuml.com/class-diagram
+
+hide empty fields
+hide empty methods
+left to right direction
+title Class Diagram - API and Utilities
+
+package api {
+  class AlbumApiClient {
+    + {static} getAlbum(token, albumId, callback)
+    + {static} getNewReleases(token, callback)
+    + {static} getUserSavedAlbums(token, callback)
+  }
+
+  class ArtistApiClient {
+    + {static} getArtist(token, artistId, callback)
+    + {static} getTopArtists(token, callback)
+    + {static} getArtistAlbums(token, artistId, callback)
+  }
+
+  class LibraryApiClient {
+    + {static} saveItemsToLibrary(token, uris, callback)
+    + {static} removeItemsFromLibrary(token, uris, callback)
+    + {static} checkUserSavedItems(token, uris, callback)
+  }
+
+  class PlayerApiClient {
+    + {static} getPlaybackState(token, callback)
+    + {static} transferPlayback(token, deviceId, callback)
+    + {static} getAvailableDevices(token, callback)
+    + {static} getCurrentlyPlayingTrack(token, callback)
+    + {static} startResumePlayback(token, trackId, deviceId, callback)
+    + {static} startContextPlayback(token, contextUri, offset, deviceId, callback)
+    + {static} startContextPlaybackAtTrack(token, contextUri, trackUri, deviceId, callback)
+    + {static} startUrisPlayback(token, uris, offset, deviceId, callback)
+    + {static} pausePlayback(token, callback)
+    + {static} skipToNext(token, callback)
+    + {static} skipToPrevious(token, callback)
+    + {static} seekToPosition(token, positionMs, callback)
+    + {static} setRepeatMode(token, state, callback)
+    + {static} setPlaybackVolume(token, volumePercent, callback)
+    + {static} togglePlaybackShuffle(token, state, callback)
+    + {static} getRecentlyPlayedTracks(token, callback)
+    + {static} getTheUserQueue(token, callback)
+    + {static} addItemToPlaybackQueue(token, trackUri, callback)
+  }
+
+  class PlaylistApiClient {
+    + {static} getPlaylist(token, playlistId, callback)
+    + {static} getPlaylistItems(token, playlistId, offset, callback)
+    + {static} getCurrentUserPlaylists(token, limit, offset, callback)
+    + {static} getCurrentUserPlaylists(token, callback)
+    + {static} createPlaylist(token, name, description, isPublic, callback)
+    + {static} createPlaylist(token, name, description, callback)
+    + {static} changePlaylistDetails(token, playlistId, name, description, callback)
+    + {static} addItemsToPlaylist(token, playlistId, uris, callback)
+    + {static} removePlaylistItems(token, playlistId, uris, snapshotId, callback)
+    + {static} addCustomPlaylistCoverImage(token, playlistId, base64Jpeg, callback)
+  }
+
+  class SearchApiClient {
+    + {static} search(token, query, types, limit, callback)
+    + {static} search(token, query, callback)
+  }
+
+  class SpotifyAuthClient {
+    + {static} getAccessToken(clientId, code, redirectUri, codeVerifier, callback)
+    + {static} refreshAccessToken(clientId, refreshToken, callback)
+  }
+
+  class TrackApiClient {
+    + {static} getTrack(token, trackId, callback)
+    + {static} getSavedTracks(token, offset, callback)
+  }
+
+  class UserApiClient {
+    + {static} getCurrentUserProfile(token, callback)
+  }
+}
+
+package utils {
+  abstract class ApiCallback {
+    + {static} GSON: Gson
+    + onFailure(call, exception)
+    + onResponse(call, response)
+    # {abstract} onSuccess(body)
+    # onError(code, body)
+  }
+
+  class Session {
+    + {static} PREFS: String
+    + {static} getAccessToken(context): String
+    + {static} getRefreshToken(context): String
+    + {static} getExpiresAt(context): long
+    + {static} millisUntilExpired(context): long
+    + {static} isExpired(context): boolean
+    + {static} hasScopes(context, requiredScopes): boolean
+    + {static} save(context, token)
+    + {static} clear(context)
+  }
+
+  class PKCEUtil {
+    + {static} generateCodeVerifier(): String
+    + {static} generateCodeChallenge(codeVerifier): String
+  }
+
+  class ImageUtils {
+    + {static} toSpotifyCoverBase64(context, imageUri): String
+  }
+
+  class PlaylistPicker {
+    + {static} show(activity, trackUri, trackName)
+  }
+}
+
+interface "okhttp3.Callback" as Callback
+
+ApiCallback ..|> Callback
+PlaylistPicker ..> ApiCallback
+PlaylistPicker ..> Session
+PlaylistPicker ..> UserApiClient
+PlaylistPicker ..> PlaylistApiClient
+
+AlbumApiClient ..> Callback
+ArtistApiClient ..> Callback
+LibraryApiClient ..> Callback
+PlayerApiClient ..> Callback
+PlaylistApiClient ..> Callback
+SearchApiClient ..> Callback
+SpotifyAuthClient ..> Callback
+TrackApiClient ..> Callback
+UserApiClient ..> Callback
+
+@enduml

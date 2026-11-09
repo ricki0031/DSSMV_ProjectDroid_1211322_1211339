@@ -148,8 +148,12 @@ public final class FakeSpotifyApi {
         requests.add(request);
 
         Stub stub = stubs.get(request.url().encodedPath());
-        int code = stub != null ? stub.code : 200;
-        String body = stub != null ? stub.body : "{}";
+        int code = 200;
+        String body = "{}";
+        if (stub != null) {
+            code = stub.code;
+            body = stub.body;
+        }
 
         return new Response.Builder()
                 .request(request)

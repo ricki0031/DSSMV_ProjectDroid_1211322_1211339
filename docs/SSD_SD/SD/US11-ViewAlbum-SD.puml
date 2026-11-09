@@ -1,0 +1,28 @@
+@startuml
+'https://plantuml.com/sequence-diagram
+autonumber
+title US11 - View Album (SD)
+
+actor User
+participant "MainActivity" as Main
+participant "AlbumFragment" as Fragment
+participant "AlbumApiClient" as Client
+participant "Spotify Web API" as Spotify
+participant "TrackAdapter" as Adapter
+
+User -> Main: select an album
+Main -> Main: openMedia(item)
+Main -> Fragment: create and show
+Fragment -> Client: getAlbum(token, albumId, callback)
+Client -> Spotify: GET /albums/{id}
+
+alt success
+    Spotify --> Fragment: album details and tracks
+    Fragment -> Adapter: create with the album tracks
+    Fragment --> User: show the album
+else error
+    Spotify --> Fragment: error code
+    Fragment --> User: show "Não foi possível carregar o álbum"
+end
+
+@enduml

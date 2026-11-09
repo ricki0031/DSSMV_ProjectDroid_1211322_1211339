@@ -110,9 +110,11 @@ public class SearchFragment extends BaseFragment {
                     boolean empty = s.toString().trim().isEmpty();
 
                     if (layoutExploreGenres != null) {
-                        layoutExploreGenres.setVisibility(
-                                empty ? View.VISIBLE : View.GONE
-                        );
+                        if (empty) {
+                            layoutExploreGenres.setVisibility(View.VISIBLE);
+                        } else {
+                            layoutExploreGenres.setVisibility(View.GONE);
+                        }
                     }
                 }
 

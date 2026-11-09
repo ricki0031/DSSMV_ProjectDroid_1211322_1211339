@@ -65,7 +65,11 @@ public class RecentGridAdapter extends RecyclerView.Adapter<RecentGridAdapter.Vi
 
     @Override
     public int getItemCount() {
-        return items != null ? items.size() : 0;
+        if (items != null) {
+            return items.size();
+        } else {
+            return 0;
+        }
     }
 
     static class ViewHolder extends RecyclerView.ViewHolder {

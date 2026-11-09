@@ -33,7 +33,9 @@ public abstract class BaseFragment extends Fragment {
 
     protected void open(MediaItem item) {
         MainActivity activity = main();
-        if (activity != null) activity.openMedia(item);
+        if (activity != null) {
+            activity.openMedia(item);
+        }
     }
 
     protected String deviceId() {

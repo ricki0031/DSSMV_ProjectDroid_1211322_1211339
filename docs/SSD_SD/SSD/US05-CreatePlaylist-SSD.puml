@@ -1,0 +1,14 @@
+@startuml
+'https://plantuml.com/sequence-diagram
+autonumber
+title US05 - Create Playlist (SSD)
+
+actor User
+participant "System" as System
+
+User -> System: Request to create a playlist
+System --> User: Ask for the playlist name
+User -> System: Submit the playlist name
+System --> User: Playlist created
+
+@enduml

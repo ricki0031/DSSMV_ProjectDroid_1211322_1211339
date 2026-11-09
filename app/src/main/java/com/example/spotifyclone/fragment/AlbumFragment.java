@@ -120,7 +120,11 @@ public class AlbumFragment extends Fragment {
                                             // 3. Avisar a MainActivity para voltar a sincronizar o Mini-Player,
                                             // dando 1 segundo de intervalo para os servidores do Spotify atualizarem.
                                             if (getActivity() instanceof MainActivity) {
-                                                try { Thread.sleep(1000); } catch (InterruptedException ignored) {}
+                                                try {
+                                                    Thread.sleep(1000);
+                                                } catch (InterruptedException ignored) {
+                                                }
+
                                                 ((MainActivity) getActivity()).syncMiniPlayer(accessToken);
                                             }
                                         }

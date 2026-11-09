@@ -1,0 +1,86 @@
+@startuml
+'https://plantuml.com/class-diagram
+
+hide circle
+hide empty methods
+top to bottom direction
+title Domain Model Diagram
+
+class User {
+    - id : String
+    - displayName : String
+}
+
+class Playlist {
+    - id : String
+    - name : String
+    - description : String
+    - isPublic : boolean
+    - collaborative : boolean
+    - snapshotId : String
+}
+
+class Track {
+    - id : String
+    - name : String
+    - uri : String
+    - trackNumber : int
+    - durationMs : long
+}
+
+class Album {
+    - id : String
+    - name : String
+    - albumType : String
+    - releaseDate : String
+    - totalTracks : int
+}
+
+class Artist {
+    - id : String
+    - name : String
+    - genres : List<String>
+    - popularity : int
+}
+
+class Image {
+    - url : String
+    - width : int
+    - height : int
+}
+
+class Device {
+    - id : String
+    - name : String
+    - type : String
+    - isActive : boolean
+    - volumePercent : int
+}
+
+class PlaybackState {
+    - isPlaying : boolean
+    - shuffleState : boolean
+    - repeatState : String
+    - progressMs : long
+}
+
+User "1" -- "*" Playlist : owns
+User "*" -- "*" Track : saves as favourite
+User "*" -- "*" Album : saves
+User "1" -- "*" Device : uses
+User "1" -- "0..1" PlaybackState : has
+
+Playlist "*" -- "*" Track : contains
+Album "1" -- "1..*" Track : contains
+Artist "1..*" -- "*" Album : releases
+Artist "1..*" -- "*" Track : performs
+
+PlaybackState "*" -- "0..1" Track : is playing
+PlaybackState "*" -- "*" Track : queues
+PlaybackState "*" -- "0..1" Device : runs on
+
+Playlist "1" -- "*" Image : illustrated by
+Album "1" -- "*" Image : illustrated by
+Artist "1" -- "*" Image : illustrated by
+
+@enduml

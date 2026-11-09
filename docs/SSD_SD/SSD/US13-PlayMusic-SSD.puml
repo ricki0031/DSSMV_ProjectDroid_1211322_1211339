@@ -1,0 +1,12 @@
+@startuml
+'https://plantuml.com/sequence-diagram
+autonumber
+title US13 - Play Music (SSD)
+
+actor User
+participant "System" as System
+
+User -> System: Select a track to play
+System --> User: Start playback and update the mini player
+
+@enduml

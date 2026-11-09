@@ -1,0 +1,12 @@
+@startuml
+'https://plantuml.com/sequence-diagram
+autonumber
+title US02 - View Home (SSD)
+
+actor User
+participant "System" as System
+
+User -> System: Open the Home tab
+System --> User: Show saved albums, top artists, playlists and recently played content
+
+@enduml

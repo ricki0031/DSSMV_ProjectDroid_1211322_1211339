@@ -357,12 +357,16 @@ public class HomeFragment extends BaseFragment {
                                             response.body().string(),
                                             RecentlyPlayedResponse.class
                                     );
+                            String receivedItems;
+                            if (result != null && result.items != null) {
+                                receivedItems = String.valueOf(result.items.size());
+                            } else {
+                                receivedItems = "null";
+                            }
+
                             android.util.Log.e(
                                     "SPOTIFY_RECENTS",
-                                    "Itens recebidos: " +
-                                            (result != null && result.items != null
-                                                    ? result.items.size()
-                                                    : "null")
+                                    "Itens recebidos: " + receivedItems
                             );
                             List<RecentlyPlayedResponse.TrackItem> tracks =
                                     new ArrayList<>();

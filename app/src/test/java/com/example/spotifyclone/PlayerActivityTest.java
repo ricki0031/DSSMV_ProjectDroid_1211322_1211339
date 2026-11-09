@@ -55,7 +55,11 @@ public class PlayerActivityTest {
     }
 
     private static String state(boolean playing, boolean shuffle, String repeat, String context) {
-        String contextJson = context == null ? "null" : "{\"uri\":\"" + context + "\"}";
+        String contextJson = "null";
+        if (context != null) {
+            contextJson = "{\"uri\":\"" + context + "\"}";
+        }
+
         return "{\"is_playing\":" + playing + ",\"shuffle_state\":" + shuffle + ",\"repeat_state\":\"" + repeat + "\","
                 + "\"progress_ms\":10000,\"device\":{\"id\":\"d2\",\"name\":\"Web Player\"},\"context\":" + contextJson + ","
                 + "\"item\":{\"id\":\"t1\",\"uri\":\"spotify:track:t1\",\"name\":\"Song\",\"duration_ms\":100000,"
@@ -301,7 +305,10 @@ public class PlayerActivityTest {
     public void queue_showsAtMostFiveTracks() {
         StringBuilder queue = new StringBuilder("{\"queue\":[");
         for (int i = 0; i < 8; i++) {
-            queue.append(i > 0 ? "," : "").append("{\"id\":\"x").append(i).append("\",\"name\":\"N").append(i).append("\"}");
+            if (i > 0) {
+                queue.append(",");
+            }
+            queue.append("{\"id\":\"x").append(i).append("\",\"name\":\"N").append(i).append("\"}");
         }
         api.stub(QUEUE_PATH, queue.append("]}").toString());
 

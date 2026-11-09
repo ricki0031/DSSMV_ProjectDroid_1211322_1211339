@@ -1,0 +1,36 @@
+@startuml
+'https://plantuml.com/sequence-diagram
+autonumber
+title US13 - Play Music (SD)
+
+actor User
+participant "SearchFragment" as Search
+participant "MainActivity" as Main
+participant "PlayerApiClient" as Player
+participant "Spotify Web API" as Spotify
+
+User -> Search: select a track
+Search -> Main: playTrack(track, siblings)
+Main -> Main: updateMiniPlayerInstantly(trackId, title, artist, coverUrl)
+
+alt the album has more than one track
+    Main -> Player: startContextPlaybackAtTrack(token, albumUri, trackUri, null, callback)
+else single-track album
+    Main -> Player: startUrisPlayback(token, uris, position, null, callback)
+end
+
+Player -> Spotify: PUT /me/player/play
+
+alt playback started
+    Spotify --> Main: success
+    Main -> Main: syncMiniPlayer(token)
+    Main -> Player: getCurrentlyPlayingTrack(token, callback)
+    Player -> Spotify: GET /me/player/currently-playing
+    Spotify --> Main: current track
+    Main --> User: update the mini player
+else error
+    Spotify --> Main: error code
+    Main --> User: show "Erro ao tocar"
+end
+
+@enduml

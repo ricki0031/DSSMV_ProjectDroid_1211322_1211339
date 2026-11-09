@@ -1,0 +1,27 @@
+@startuml
+'https://plantuml.com/sequence-diagram
+autonumber
+title US03 - Search Content (SD)
+
+actor User
+participant "SearchFragment" as Search
+participant "SearchApiClient" as Client
+participant "Spotify Web API" as Spotify
+participant "TrackAdapter" as Tracks
+participant "MediaCardAdapter" as Media
+
+User -> Search: type a search term
+Search -> Search: wait 350 ms (debounce)
+Search -> Client: search(token, query, "track,artist,album,playlist", 10, callback)
+Client -> Spotify: GET /search
+Spotify --> Search: SearchResponse
+
+alt results found
+    Search -> Tracks: notifyDataSetChanged()
+    Search -> Media: submit(items)
+    Search --> User: show the results
+else no tracks found
+    Search --> User: show "Nenhum resultado encontrado"
+end
+
+@enduml

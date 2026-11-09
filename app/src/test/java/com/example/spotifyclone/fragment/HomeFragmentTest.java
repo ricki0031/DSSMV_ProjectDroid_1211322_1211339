@@ -157,7 +157,10 @@ public class HomeFragmentTest {
     public void grid_neverHasMoreThanEightItems() {
         StringBuilder albums = new StringBuilder("{\"items\":[");
         for (int i = 0; i < 12; i++) {
-            albums.append(i > 0 ? "," : "").append("{\"album\":{\"id\":\"al").append(i).append("\"}}");
+            if (i > 0) {
+                albums.append(",");
+            }
+            albums.append("{\"album\":{\"id\":\"al").append(i).append("\"}}");
         }
         api.stub(ALBUMS_PATH, albums.append("]}").toString());
 

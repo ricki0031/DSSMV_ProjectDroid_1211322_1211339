@@ -1,0 +1,14 @@
+@startuml
+'https://plantuml.com/sequence-diagram
+autonumber
+title US01 - Log In with Spotify (SSD)
+
+actor User
+participant "System" as System
+
+User -> System: Open the application
+System --> User: Redirect to the Spotify login page
+User -> System: Log in and authorize the application
+System --> User: Show the Home screen
+
+@enduml

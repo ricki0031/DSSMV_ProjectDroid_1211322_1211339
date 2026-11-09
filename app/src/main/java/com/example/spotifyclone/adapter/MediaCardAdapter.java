@@ -38,21 +38,31 @@ public class MediaCardAdapter extends RecyclerView.Adapter<MediaCardAdapter.View
     private final int style;
 
     public MediaCardAdapter(List<MediaItem> items, int style, OnItemClickListener listener) {
-        if (items != null) this.items.addAll(items);
+        if (items != null) {
+            this.items.addAll(items);
+        }
         this.style = style;
         this.listener = listener;
     }
 
     public void submit(List<MediaItem> newItems) {
         items.clear();
-        if (newItems != null) items.addAll(newItems);
+        if (newItems != null) {
+            items.addAll(newItems);
+        }
         notifyDataSetChanged();
     }
 
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        int layout = style == STYLE_LIST ? R.layout.item_media_row : R.layout.item_horizontal_card;
+        int layout;
+        if (style == STYLE_LIST) {
+            layout = R.layout.item_media_row;
+        } else {
+            layout = R.layout.item_horizontal_card;
+        }
+
         View view = LayoutInflater.from(parent.getContext()).inflate(layout, parent, false);
         return new ViewHolder(view, style);
     }
@@ -76,12 +86,20 @@ public class MediaCardAdapter extends RecyclerView.Adapter<MediaCardAdapter.View
         }
 
         // Nos cartões de artista o nome fica centrado debaixo do círculo
-        int gravity = item.isArtist() && style == STYLE_CARD ? Gravity.CENTER_HORIZONTAL : Gravity.START;
+        int gravity;
+        if (item.isArtist() && style == STYLE_CARD) {
+            gravity = Gravity.CENTER_HORIZONTAL;
+        } else {
+            gravity = Gravity.START;
+        }
+
         holder.title.setGravity(gravity);
         holder.subtitle.setGravity(gravity);
 
         holder.itemView.setOnClickListener(v -> {
-            if (listener != null) listener.onItemClick(item);
+            if (listener != null) {
+                listener.onItemClick(item);
+            }
         });
     }
 

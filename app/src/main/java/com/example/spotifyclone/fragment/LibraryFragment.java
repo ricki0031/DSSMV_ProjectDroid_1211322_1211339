@@ -169,21 +169,18 @@ public class LibraryFragment extends Fragment {
             return;
         }
 
-        buttonFilterPlaylists.setBackgroundTintList(
-                ColorStateList.valueOf(
-                        showingPlaylists
-                                ? WallpaperStyle.BUTTON_ACTIVE_COLOR
-                                : WallpaperStyle.BUTTON_INACTIVE_COLOR
-                )
-        );
+        int playlistsButtonColor;
+        int albumsButtonColor;
+        if (showingPlaylists) {
+            playlistsButtonColor = WallpaperStyle.BUTTON_ACTIVE_COLOR;
+            albumsButtonColor = WallpaperStyle.BUTTON_INACTIVE_COLOR;
+        } else {
+            playlistsButtonColor = WallpaperStyle.BUTTON_INACTIVE_COLOR;
+            albumsButtonColor = WallpaperStyle.BUTTON_ACTIVE_COLOR;
+        }
 
-        buttonFilterAlbums.setBackgroundTintList(
-                ColorStateList.valueOf(
-                        showingPlaylists
-                                ? WallpaperStyle.BUTTON_INACTIVE_COLOR
-                                : WallpaperStyle.BUTTON_ACTIVE_COLOR
-                )
-        );
+        buttonFilterPlaylists.setBackgroundTintList(ColorStateList.valueOf(playlistsButtonColor));
+        buttonFilterAlbums.setBackgroundTintList(ColorStateList.valueOf(albumsButtonColor));
 
         if (showingPlaylists) {
             textPlaylistsTitle.setVisibility(View.VISIBLE);
@@ -249,11 +246,15 @@ public class LibraryFragment extends Fragment {
                         )
                 );
             } else {
-                recyclerViewGrid.setLayoutManager(
-                        albumViewMode == ALBUM_VIEW_GRID
-                                ? new GridLayoutManager(requireContext(), 2)
-                                : new LinearLayoutManager(requireContext())
-                );
+                if (albumViewMode == ALBUM_VIEW_GRID) {
+                    recyclerViewGrid.setLayoutManager(
+                            new GridLayoutManager(requireContext(), 2)
+                    );
+                } else {
+                    recyclerViewGrid.setLayoutManager(
+                            new LinearLayoutManager(requireContext())
+                    );
+                }
 
                 albumAdapter = new AlbumAdapter(
                         new ArrayList<>(albums),

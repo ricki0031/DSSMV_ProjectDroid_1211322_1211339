@@ -1,0 +1,31 @@
+@startuml
+'https://plantuml.com/sequence-diagram
+autonumber
+title US02 - View Home (SD)
+
+actor User
+participant "HomeFragment" as Home
+participant "AlbumApiClient" as Albums
+participant "ArtistApiClient" as Artists
+participant "PlaylistApiClient" as Playlists
+participant "PlayerApiClient" as Player
+participant "Spotify Web API" as Spotify
+
+User -> Home: open the Home tab
+Home -> Albums: getUserSavedAlbums(token, callback)
+Albums -> Spotify: GET /me/albums
+Spotify --> Home: saved albums
+Home -> Artists: getTopArtists(token, callback)
+Artists -> Spotify: GET /me/top/artists
+Spotify --> Home: top artists
+Home -> Playlists: getCurrentUserPlaylists(token, 50, 0, callback)
+Playlists -> Spotify: GET /me/playlists
+Spotify --> Home: playlists
+Home -> Home: showQuickAccess()
+Home -> Player: getRecentlyPlayedTracks(token, callback)
+Player -> Spotify: GET /me/player/recently-played
+Spotify --> Home: recently played tracks
+Home -> Home: showRecents()
+Home --> User: show the grid, "Voltar a ouvir" and "Ouvidas recentemente"
+
+@enduml

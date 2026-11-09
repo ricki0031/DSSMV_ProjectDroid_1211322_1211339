@@ -1,0 +1,33 @@
+@startuml
+'https://plantuml.com/sequence-diagram
+autonumber
+title US04 - View Library (SD)
+
+actor User
+participant "LibraryFragment" as Library
+participant "AlbumApiClient" as Albums
+participant "PlaylistApiClient" as Playlists
+participant "Spotify Web API" as Spotify
+
+User -> Library: open the Library tab
+Library -> Albums: getUserSavedAlbums(token, callback)
+Albums -> Spotify: GET /me/albums
+Spotify --> Library: saved albums
+Library -> Playlists: getCurrentUserPlaylists(token, 50, 0, callback)
+Playlists -> Spotify: GET /me/playlists
+Spotify --> Library: playlists
+Library -> Library: updateLibraryView()
+Library --> User: show the playlists
+
+User -> Library: select the "Álbuns" filter
+Library -> Library: updateLibraryView()
+Library --> User: show the albums in a grid
+
+loop each tap on the view mode button
+    User -> Library: change the view mode
+    Library -> Library: albumViewMode = next mode (grid, large, list)
+    Library -> Library: updateLibraryView()
+    Library --> User: show the albums in the new view
+end
+
+@enduml

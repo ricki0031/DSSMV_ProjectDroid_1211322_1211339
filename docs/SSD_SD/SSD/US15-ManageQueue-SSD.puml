@@ -1,0 +1,14 @@
+@startuml
+'https://plantuml.com/sequence-diagram
+autonumber
+title US15 - Manage Queue (SSD)
+
+actor User
+participant "System" as System
+
+User -> System: Open the player
+System --> User: Show the next tracks in the queue
+User -> System: Add the current track to the queue
+System --> User: Queue updated
+
+@enduml

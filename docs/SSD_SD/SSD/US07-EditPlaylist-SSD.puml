@@ -1,0 +1,14 @@
+@startuml
+'https://plantuml.com/sequence-diagram
+autonumber
+title US07 - Edit Playlist (SSD)
+
+actor User
+participant "System" as System
+
+User -> System: Request to edit an owned playlist
+System --> User: Show the current details
+User -> System: Submit the new name, description and cover
+System --> User: Playlist updated
+
+@enduml

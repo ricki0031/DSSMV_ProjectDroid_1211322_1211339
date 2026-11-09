@@ -1,0 +1,25 @@
+@startuml
+'https://plantuml.com/sequence-diagram
+autonumber
+title US12 - View Artist (SD)
+
+actor User
+participant "MainActivity" as Main
+participant "ArtistFragment" as Fragment
+participant "ArtistApiClient" as Client
+participant "Spotify Web API" as Spotify
+participant "MediaCardAdapter" as Adapter
+
+User -> Main: select an artist
+Main -> Main: openMedia(item)
+Main -> Fragment: create and show
+Fragment -> Client: getArtist(token, artistId, callback)
+Client -> Spotify: GET /artists/{id}
+Spotify --> Fragment: artist profile
+Fragment -> Client: getArtistAlbums(token, artistId, callback)
+Client -> Spotify: GET /artists/{id}/albums
+Spotify --> Fragment: albums
+Fragment -> Adapter: submit(items)
+Fragment --> User: show the profile and discography
+
+@enduml

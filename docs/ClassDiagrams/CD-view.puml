@@ -1,0 +1,159 @@
+@startuml
+'https://plantuml.com/class-diagram
+
+hide empty fields
+hide empty methods
+title Class Diagram - View
+
+class MainActivity {
+  + globalDeviceId: String
+  - isPlaying: boolean
+  - currentTrackId: String
+  - navInitialized: boolean
+  - refreshingToken: boolean
+  + fetchActiveDevice(token)
+  + openMedia(item)
+  + playTrack(track, siblings)
+  + updateMiniPlayerInstantly(trackId, title, artist, coverUrl)
+  + showTrackMenu(anchor, track, extraLabel, extraAction)
+  + syncMiniPlayer(accessToken)
+}
+
+class PlayerActivity {
+  - deviceId: String
+  - isPlaying: boolean
+  - isShuffle: boolean
+  - isLiked: boolean
+  - repeatState: String
+  - progressMs: int
+  - durationMs: int
+  - currentTrack: Track
+  - currentContextUri: String
+}
+
+package fragment {
+  abstract class BaseFragment {
+    # token(): String
+    # alive(): boolean
+    # main(): MainActivity
+    # open(item)
+    # deviceId(): String
+  }
+
+  class HomeFragment {
+    - accessToken: String
+    - savedAlbums: List<MediaItem>
+    - topArtists: List<MediaItem>
+    - userPlaylists: List<MediaItem>
+    - recentTracks: List<TrackItem>
+  }
+
+  class SearchFragment {
+    + {static} ARG_ADD_TO_PLAYLIST_ID: String
+    + {static} ARG_ADD_TO_PLAYLIST_NAME: String
+    - addToPlaylistId: String
+    - addToPlaylistName: String
+    - tracks: List<Track>
+  }
+
+  class PlaylistFragment {
+    + {static} ARG_PLAYLIST_ID: String
+    + {static} ARG_LIKED_SONGS: String
+    - playlistId: String
+    - likedSongs: boolean
+    - playlist: Playlist
+    - editable: boolean
+    - tracks: List<Track>
+  }
+
+  class ArtistFragment {
+    + {static} ARG_ARTIST_ID: String
+    - artistId: String
+  }
+
+  class LibraryFragment {
+    - accessToken: String
+    - playlists: List<MediaItem>
+    - albums: List<Album>
+    - showingPlaylists: boolean
+    - gridMode: boolean
+    - albumViewMode: int
+  }
+
+  class AlbumFragment {
+    - accessToken: String
+    - albumId: String
+  }
+}
+
+package adapter {
+  class AlbumAdapter {
+    + getItemCount(): int
+  }
+
+  class MediaCardAdapter {
+    + {static} STYLE_CARD: int
+    + {static} STYLE_LIST: int
+    + submit(newItems)
+    + getItemCount(): int
+  }
+
+  class RecentGridAdapter {
+    + getItemCount(): int
+  }
+
+  class TrackAdapter {
+    + showCovers(show): TrackAdapter
+    + setOnTrackMenuListener(listener): TrackAdapter
+    + removeAt(position)
+    + getItemCount(): int
+  }
+}
+
+package customization {
+  class WallpaperStyle {
+    + {static} BUTTON_ACTIVE_COLOR: int
+    + {static} BUTTON_INACTIVE_COLOR: int
+    + {static} apply(activity)
+  }
+
+  class BottomNavigationFade {
+    + {static} apply(navigation, fadeColor)
+  }
+
+  class MiniPlayerColors {
+    + {static} apply(miniPlayer, startColor, endColor)
+  }
+}
+
+HomeFragment --|> BaseFragment
+SearchFragment --|> BaseFragment
+PlaylistFragment --|> BaseFragment
+ArtistFragment --|> BaseFragment
+
+MainActivity ..> HomeFragment : shows
+MainActivity ..> SearchFragment : shows
+MainActivity ..> LibraryFragment : shows
+MainActivity ..> PlaylistFragment : shows
+MainActivity ..> ArtistFragment : shows
+MainActivity ..> AlbumFragment : shows
+MainActivity ..> PlayerActivity : starts
+PlayerActivity ..> MainActivity : opens album
+BaseFragment ..> MainActivity : main()
+
+HomeFragment --> RecentGridAdapter
+HomeFragment --> MediaCardAdapter
+SearchFragment --> TrackAdapter
+SearchFragment --> MediaCardAdapter
+PlaylistFragment --> TrackAdapter
+ArtistFragment --> MediaCardAdapter
+LibraryFragment --> AlbumAdapter
+LibraryFragment --> MediaCardAdapter
+AlbumFragment --> TrackAdapter
+
+MainActivity ..> WallpaperStyle
+LibraryFragment ..> WallpaperStyle
+WallpaperStyle ..> BottomNavigationFade
+WallpaperStyle ..> MiniPlayerColors
+
+@enduml

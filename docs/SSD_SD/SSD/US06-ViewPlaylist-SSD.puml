@@ -1,0 +1,12 @@
+@startuml
+'https://plantuml.com/sequence-diagram
+autonumber
+title US06 - View Playlist (SSD)
+
+actor User
+participant "System" as System
+
+User -> System: Select a playlist or the favourite songs
+System --> User: Show its details and tracks
+
+@enduml

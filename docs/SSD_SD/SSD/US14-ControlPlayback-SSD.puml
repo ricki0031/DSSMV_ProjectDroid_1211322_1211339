@@ -1,0 +1,14 @@
+@startuml
+'https://plantuml.com/sequence-diagram
+autonumber
+title US14 - Control Playback (SSD)
+
+actor User
+participant "System" as System
+
+User -> System: Open the player
+System --> User: Show the current track and progress
+User -> System: Play, pause, skip, seek, shuffle or repeat
+System --> User: Update the playback state
+
+@enduml

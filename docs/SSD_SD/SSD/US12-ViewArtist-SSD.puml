@@ -1,0 +1,12 @@
+@startuml
+'https://plantuml.com/sequence-diagram
+autonumber
+title US12 - View Artist (SSD)
+
+actor User
+participant "System" as System
+
+User -> System: Select an artist
+System --> User: Show the artist profile and discography
+
+@enduml

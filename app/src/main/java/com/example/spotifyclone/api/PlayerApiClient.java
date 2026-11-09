@@ -134,7 +134,9 @@ public class PlayerApiClient {
         StringBuilder urisJson = new StringBuilder("[");
         if (uris != null) {
             for (int i = 0; i < uris.size(); i++) {
-                if (i > 0) urisJson.append(", ");
+                if (i > 0) {
+                    urisJson.append(", ");
+                }
                 urisJson.append("\"").append(uris.get(i)).append("\"");
             }
         }

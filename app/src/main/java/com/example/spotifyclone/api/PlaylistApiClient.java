@@ -55,7 +55,13 @@ public class PlaylistApiClient {
     public static void createPlaylist(String accessToken, String name, String description, boolean isPublic, Callback callback) {
         JsonObject json = new JsonObject();
         json.addProperty("name", name);
-        json.addProperty("description", description != null ? description : "");
+
+        if (description != null) {
+            json.addProperty("description", description);
+        } else {
+            json.addProperty("description", "");
+        }
+
         json.addProperty("public", isPublic);
 
         MediaType JSON = MediaType.parse("application/json; charset=utf-8");

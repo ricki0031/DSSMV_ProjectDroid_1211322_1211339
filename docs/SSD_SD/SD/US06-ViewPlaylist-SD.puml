@@ -1,0 +1,37 @@
+@startuml
+'https://plantuml.com/sequence-diagram
+autonumber
+title US06 - View Playlist (SD)
+
+actor User
+participant "MainActivity" as Main
+participant "PlaylistFragment" as Fragment
+participant "UserApiClient" as Users
+participant "PlaylistApiClient" as Playlists
+participant "TrackApiClient" as Tracks
+participant "Spotify Web API" as Spotify
+
+User -> Main: select a playlist
+Main -> Main: openMedia(item)
+Main -> Fragment: create and show
+
+alt favourite songs
+    Fragment -> Tracks: getSavedTracks(token, offset, callback)
+    Tracks -> Spotify: GET /me/tracks
+    Spotify --> Fragment: saved tracks
+else playlist
+    Fragment -> Users: getCurrentUserProfile(token, callback)
+    Users -> Spotify: GET /me
+    Spotify --> Fragment: user profile
+    Fragment -> Playlists: getPlaylist(token, playlistId, callback)
+    Playlists -> Spotify: GET /playlists/{id}
+    Spotify --> Fragment: playlist details
+    Fragment -> Fragment: renderPlaylistHeader()
+    Fragment -> Playlists: getPlaylistItems(token, playlistId, offset, callback)
+    Playlists -> Spotify: GET /playlists/{id}/items
+    Spotify --> Fragment: playlist tracks
+end
+
+Fragment --> User: show the details and tracks
+
+@enduml

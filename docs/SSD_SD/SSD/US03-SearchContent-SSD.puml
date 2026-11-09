@@ -1,0 +1,12 @@
+@startuml
+'https://plantuml.com/sequence-diagram
+autonumber
+title US03 - Search Content (SSD)
+
+actor User
+participant "System" as System
+
+User -> System: Type a search term or select a genre
+System --> User: Show matching tracks, artists, albums and playlists
+
+@enduml

@@ -1,0 +1,34 @@
+@startuml
+'https://plantuml.com/sequence-diagram
+autonumber
+title US08 - Add Track to Playlist (SD)
+
+actor User
+participant "MainActivity" as Main
+participant "PlaylistPicker" as Picker
+participant "UserApiClient" as Users
+participant "PlaylistApiClient" as Playlists
+participant "Spotify Web API" as Spotify
+
+User -> Main: choose "Adicionar a playlist"
+Main -> Picker: show(activity, trackUri, trackName)
+Picker -> Users: getCurrentUserProfile(token, callback)
+Users -> Spotify: GET /me
+Spotify --> Picker: user profile
+Picker -> Playlists: getCurrentUserPlaylists(token, 50, 0, callback)
+Playlists -> Spotify: GET /me/playlists
+Spotify --> Picker: playlists
+Picker -> Picker: keep owned or collaborative playlists
+
+alt no editable playlists
+    Picker --> User: show "Ainda não tens playlists"
+else editable playlists found
+    Picker --> User: show the playlist dialog
+    User -> Picker: select a playlist
+    Picker -> Playlists: addItemsToPlaylist(token, playlistId, uris, callback)
+    Playlists -> Spotify: POST /playlists/{id}/items
+    Spotify --> Picker: success
+    Picker --> User: show the confirmation message
+end
+
+@enduml

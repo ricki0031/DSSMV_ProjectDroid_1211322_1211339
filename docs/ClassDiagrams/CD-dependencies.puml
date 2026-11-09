@@ -1,0 +1,87 @@
+@startuml
+'https://plantuml.com/class-diagram
+
+hide empty members
+hide circle
+left to right direction
+skinparam defaultFontSize 14
+skinparam nodesep 25
+skinparam ranksep 140
+skinparam ArrowThickness 1.4
+title Class Diagram - View to API Dependencies
+
+class MainActivity #C9DDFF
+class "SpotifyAuthClient" as MainAuth
+class "PKCEUtil" as MainPkce
+class "Session" as MainSession
+class "PlaylistPicker" as MainPicker
+class "LibraryApiClient" as MainLibrary
+class "PlayerApiClient" as MainPlayer
+MainActivity .[#1565C0].> MainAuth
+MainActivity .[#1565C0].> MainPkce
+MainActivity .[#1565C0].> MainSession
+MainActivity .[#1565C0].> MainPicker
+MainActivity .[#1565C0].> MainLibrary
+MainActivity .[#1565C0].> MainPlayer
+
+class PlayerActivity #C9DDFF
+class "Session" as PlayerSession
+class "PlaylistPicker" as PlayerPicker
+class "LibraryApiClient" as PlayerLibrary
+class "PlayerApiClient" as PlayerPlayer
+class "PlaylistApiClient" as PlayerPlaylist
+PlayerActivity .[#1565C0].> PlayerSession
+PlayerActivity .[#1565C0].> PlayerPicker
+PlayerActivity .[#1565C0].> PlayerLibrary
+PlayerActivity .[#1565C0].> PlayerPlayer
+PlayerActivity .[#1565C0].> PlayerPlaylist
+
+class HomeFragment #C9DDFF
+class "AlbumApiClient" as HomeAlbum
+class "ArtistApiClient" as HomeArtist
+class "PlayerApiClient" as HomePlayer
+class "PlaylistApiClient" as HomePlaylist
+HomeFragment .[#1565C0].> HomeAlbum
+HomeFragment .[#1565C0].> HomeArtist
+HomeFragment .[#1565C0].> HomePlayer
+HomeFragment .[#1565C0].> HomePlaylist
+
+class SearchFragment #C9DDFF
+class "SearchApiClient" as SearchSearch
+class "PlaylistApiClient" as SearchPlaylist
+SearchFragment .[#1565C0].> SearchSearch
+SearchFragment .[#1565C0].> SearchPlaylist
+
+class LibraryFragment #C9DDFF
+class "AlbumApiClient" as LibraryAlbum
+class "PlaylistApiClient" as LibraryPlaylist
+LibraryFragment .[#1565C0].> LibraryAlbum
+LibraryFragment .[#1565C0].> LibraryPlaylist
+
+class PlaylistFragment #C9DDFF
+class "LibraryApiClient" as PlaylistLibrary
+class "PlayerApiClient" as PlaylistPlayer
+class "PlaylistApiClient" as PlaylistPlaylist
+class "TrackApiClient" as PlaylistTrack
+class "UserApiClient" as PlaylistUser
+class "ImageUtils" as PlaylistImage
+PlaylistFragment .[#1565C0].> PlaylistLibrary
+PlaylistFragment .[#1565C0].> PlaylistPlayer
+PlaylistFragment .[#1565C0].> PlaylistPlaylist
+PlaylistFragment .[#1565C0].> PlaylistTrack
+PlaylistFragment .[#1565C0].> PlaylistUser
+PlaylistFragment .[#1565C0].> PlaylistImage
+
+class AlbumFragment #C9DDFF
+class "AlbumApiClient" as AlbumAlbum
+class "PlayerApiClient" as AlbumPlayer
+AlbumFragment .[#1565C0].> AlbumAlbum
+AlbumFragment .[#1565C0].> AlbumPlayer
+
+class ArtistFragment #C9DDFF
+class "ArtistApiClient" as ArtistArtist
+class "PlayerApiClient" as ArtistPlayer
+ArtistFragment .[#1565C0].> ArtistArtist
+ArtistFragment .[#1565C0].> ArtistPlayer
+
+@enduml

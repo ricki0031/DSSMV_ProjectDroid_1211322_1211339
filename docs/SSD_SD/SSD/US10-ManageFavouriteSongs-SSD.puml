@@ -1,0 +1,12 @@
+@startuml
+'https://plantuml.com/sequence-diagram
+autonumber
+title US10 - Manage Favourite Songs (SSD)
+
+actor User
+participant "System" as System
+
+User -> System: Save or remove the current track from the favourite songs
+System --> User: Favourite songs updated
+
+@enduml

@@ -1,0 +1,185 @@
+@startuml
+'https://plantuml.com/class-diagram
+
+hide empty methods
+left to right direction
+title Class Diagram - Model
+
+class Track {
+  + id: String
+  + name: String
+  + uri: String
+  + trackNumber: int
+  + durationMs: long
+  + uriOrBuild(): String
+  + artistNames(): String
+  + coverUrl(): String
+}
+
+class Album {
+  + id: String
+  + name: String
+  + albumType: String
+  + releaseDate: String
+  + totalTracks: int
+  + firstImageUrl(): String
+  + artistNames(): String
+}
+
+class "Album.TracksPage" as TracksPage
+
+class Artist {
+  + id: String
+  + name: String
+  + genres: List<String>
+  + popularity: Integer
+}
+
+class Playlist {
+  + id: String
+  + name: String
+  + description: String
+  + isPublic: Boolean
+  + collaborative: boolean
+  + snapshotId: String
+  + uri: String
+  + firstImageUrl(): String
+}
+
+class PlaylistItem {
+  + addedAt: String
+  + isLocal: boolean
+}
+
+class SavedTrack {
+  + addedAt: String
+}
+
+class ImageObject {
+  + url: String
+  + height: Integer
+  + width: Integer
+}
+
+class UserProfile {
+  + id: String
+  + displayName: String
+}
+
+class Device {
+  + id: String
+  + isActive: boolean
+  + isPrivateSession: boolean
+  + name: String
+  + type: String
+  + volumePercent: int
+}
+
+class "Page<T>" as Page {
+  + items: List<T>
+  + total: int
+  + next: String
+  + offset: int
+}
+
+class MediaItem {
+  + {static} TYPE_ALBUM: String
+  + {static} TYPE_PLAYLIST: String
+  + {static} TYPE_ARTIST: String
+  + {static} TYPE_LIKED_SONGS: String
+  + type: String
+  + id: String
+  + title: String
+  + subtitle: String
+  + imageUrl: String
+  + isArtist(): boolean
+  + isLikedSongs(): boolean
+  + {static} likedSongs(): MediaItem
+  + {static} fromAlbum(album): MediaItem
+  + {static} fromPlaylist(playlist): MediaItem
+  + {static} fromArtist(artist): MediaItem
+}
+
+class TokenResponse {
+  - accessToken: String
+  - tokenType: String
+  - expiresIn: int
+  - refreshToken: String
+  - scope: String
+  + getAccessToken(): String
+  + getTokenType(): String
+  + getExpiresIn(): int
+  + getRefreshToken(): String
+  + getScope(): String
+}
+
+class PlaybackStateResponse {
+  + repeatState: String
+  + shuffleState: boolean
+  + isPlaying: boolean
+  + progressMs: long
+}
+
+class "PlaybackStateResponse.PlaybackContext" as PlaybackContext {
+  + uri: String
+}
+
+class CurrentlyPlayingResponse {
+  + isPlaying: boolean
+  + progressMs: long
+}
+
+class QueueResponse
+class DevicesResponse
+class SearchResponse
+class FollowedArtistsResponse
+class SavedAlbumsResponse
+class "SavedAlbumsResponse.SavedAlbumItem" as SavedAlbumItem
+class NewReleasesResponse
+class "NewReleasesResponse.AlbumsPage" as AlbumsPage
+class RecentlyPlayedResponse
+class "RecentlyPlayedResponse.PlayHistoryObject" as PlayHistoryObject
+
+class "RecentlyPlayedResponse.TrackItem" as TrackItem {
+  + id: String
+  + name: String
+}
+
+Track "*" --> "1" Album : album
+Track "*" --> "*" Artist : artists
+Album "*" --> "*" Artist : artists
+Album "1" --> "*" ImageObject : images
+Album "1" --> "0..1" TracksPage : tracks
+TracksPage "1" --> "*" Track : items
+Artist "1" --> "*" ImageObject : images
+
+Playlist "1" --> "*" ImageObject : images
+Playlist "*" --> "1" UserProfile : owner
+Playlist "1" --> "1" Page : items
+UserProfile "1" --> "*" ImageObject : images
+PlaylistItem "*" --> "1" Track : item
+SavedTrack "*" --> "1" Track : track
+
+PlaybackStateResponse "1" --> "0..1" Device : device
+PlaybackStateResponse "1" --> "0..1" Track : item
+PlaybackStateResponse "1" --> "0..1" PlaybackContext : context
+CurrentlyPlayingResponse "1" --> "0..1" Track : item
+QueueResponse "1" --> "*" Track : queue
+DevicesResponse "1" --> "*" Device : devices
+
+SearchResponse "1" --> "4" Page : tracks, artists, albums, playlists
+FollowedArtistsResponse "1" --> "1" Page : artists
+SavedAlbumsResponse "1" --> "*" SavedAlbumItem : items
+SavedAlbumItem "1" --> "1" Album : album
+NewReleasesResponse "1" --> "1" AlbumsPage : albums
+AlbumsPage "1" --> "*" Album : items
+RecentlyPlayedResponse "1" --> "*" PlayHistoryObject : items
+PlayHistoryObject "1" --> "1" TrackItem : track
+TrackItem "*" --> "1" Album : album
+TrackItem "*" --> "*" Artist : artists
+
+MediaItem ..> Album : <<create from>>
+MediaItem ..> Playlist : <<create from>>
+MediaItem ..> Artist : <<create from>>
+
+@enduml

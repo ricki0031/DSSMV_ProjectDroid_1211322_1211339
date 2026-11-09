@@ -1,0 +1,14 @@
+@startuml
+'https://plantuml.com/sequence-diagram
+autonumber
+title US04 - View Library (SSD)
+
+actor User
+participant "System" as System
+
+User -> System: Open the Library tab
+System --> User: Show the user's playlists
+User -> System: Filter by albums and change the view mode
+System --> User: Show the saved albums in the selected view
+
+@enduml

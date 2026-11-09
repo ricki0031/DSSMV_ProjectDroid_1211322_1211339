@@ -1,0 +1,45 @@
+@startuml
+'https://plantuml.com/sequence-diagram
+autonumber
+title US14 - Control Playback (SD)
+
+actor User
+participant "PlayerActivity" as Activity
+participant "PlayerApiClient" as Player
+participant "Spotify Web API" as Spotify
+
+User -> Activity: open the player
+
+loop every 5 seconds while visible
+    Activity -> Player: getPlaybackState(token, callback)
+    Player -> Spotify: GET /me/player
+    Spotify --> Activity: playback state
+    Activity --> User: update the track, progress and controls
+end
+
+alt play or pause
+    User -> Activity: tap play or pause
+    Activity -> Player: startResumePlayback(...) or pausePlayback(...)
+    Player -> Spotify: PUT /me/player/play or /pause
+else skip
+    User -> Activity: tap next or previous
+    Activity -> Player: skipToNext(...) or skipToPrevious(...)
+    Player -> Spotify: POST /me/player/next or /previous
+else seek
+    User -> Activity: release the progress bar
+    Activity -> Player: seekToPosition(token, positionMs, callback)
+    Player -> Spotify: PUT /me/player/seek
+else shuffle
+    User -> Activity: tap shuffle
+    Activity -> Player: togglePlaybackShuffle(token, state, callback)
+    Player -> Spotify: PUT /me/player/shuffle
+else repeat
+    User -> Activity: tap repeat
+    Activity -> Player: setRepeatMode(token, state, callback)
+    Player -> Spotify: PUT /me/player/repeat
+end
+
+Spotify --> Activity: success
+Activity --> User: update the controls
+
+@enduml

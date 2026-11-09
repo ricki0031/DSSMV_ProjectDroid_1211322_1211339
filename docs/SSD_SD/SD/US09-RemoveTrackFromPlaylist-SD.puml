@@ -1,0 +1,25 @@
+@startuml
+'https://plantuml.com/sequence-diagram
+autonumber
+title US09 - Remove Track from Playlist (SD)
+
+actor User
+participant "PlaylistFragment" as Fragment
+participant "MainActivity" as Main
+participant "PlaylistApiClient" as Client
+participant "Spotify Web API" as Spotify
+participant "TrackAdapter" as Adapter
+
+User -> Fragment: open the track menu
+Fragment -> Main: showTrackMenu(anchor, track, "Remover desta playlist", action)
+Main --> User: show the track menu
+User -> Main: choose "Remover desta playlist"
+Main -> Fragment: removeFromPlaylist(track, position)
+Fragment -> Client: removePlaylistItems(token, playlistId, uris, snapshotId, callback)
+Client -> Spotify: DELETE /playlists/{id}/items
+Spotify --> Fragment: new snapshot id
+Fragment -> Fragment: onTrackRemoved(position, message)
+Fragment -> Adapter: removeAt(position)
+Fragment --> User: show "Removido da playlist"
+
+@enduml

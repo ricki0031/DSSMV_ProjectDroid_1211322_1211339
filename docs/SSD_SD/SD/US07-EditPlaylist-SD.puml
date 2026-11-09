@@ -1,0 +1,32 @@
+@startuml
+'https://plantuml.com/sequence-diagram
+autonumber
+title US07 - Edit Playlist (SD)
+
+actor User
+participant "PlaylistFragment" as Fragment
+participant "ImageUtils" as Images
+participant "PlaylistApiClient" as Client
+participant "Spotify Web API" as Spotify
+
+User -> Fragment: tap the edit button
+Fragment -> Fragment: showEditDialog()
+Fragment --> User: show the current details
+User -> Fragment: submit the name, description and optional cover
+Fragment -> Client: changePlaylistDetails(token, playlistId, name, description, callback)
+Client -> Spotify: PUT /playlists/{id}
+Spotify --> Fragment: success
+Fragment -> Fragment: renderPlaylistHeader()
+
+alt a new cover was chosen
+    Fragment -> Images: toSpotifyCoverBase64(context, imageUri)
+    Images --> Fragment: base64 JPEG
+    Fragment -> Client: addCustomPlaylistCoverImage(token, playlistId, base64, callback)
+    Client -> Spotify: PUT /playlists/{id}/images
+    Spotify --> Fragment: success
+    Fragment --> User: show "Capa atualizada"
+else no new cover
+    Fragment --> User: show "Playlist atualizada"
+end
+
+@enduml

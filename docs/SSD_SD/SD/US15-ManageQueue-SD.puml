@@ -1,0 +1,34 @@
+@startuml
+'https://plantuml.com/sequence-diagram
+autonumber
+title US15 - Manage Queue (SD)
+
+actor User
+participant "PlayerActivity" as Activity
+participant "PlayerApiClient" as Player
+participant "Spotify Web API" as Spotify
+
+User -> Activity: open the player
+Activity -> Player: getTheUserQueue(token, callback)
+Player -> Spotify: GET /me/player/queue
+Spotify --> Activity: QueueResponse
+Activity -> Activity: hide repeated current track, keep up to 5 tracks
+Activity --> User: show "Next in queue"
+
+User -> Activity: choose "Adicionar à Fila"
+Activity -> Player: addItemToPlaybackQueue(token, trackUri, callback)
+Player -> Spotify: POST /me/player/queue
+
+alt success
+    Spotify --> Activity: success
+    Activity --> User: show "Adicionado à fila"
+    Activity -> Player: getTheUserQueue(token, callback)
+    Player -> Spotify: GET /me/player/queue
+    Spotify --> Activity: updated queue
+    Activity --> User: update "Next in queue"
+else error
+    Spotify --> Activity: error code
+    Activity --> User: show "Não foi possível adicionar à fila"
+end
+
+@enduml
