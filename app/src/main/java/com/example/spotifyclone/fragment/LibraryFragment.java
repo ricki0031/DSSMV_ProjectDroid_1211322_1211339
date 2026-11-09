@@ -3,7 +3,6 @@ package com.example.spotifyclone.fragment;
 
 import android.app.AlertDialog;
 import android.content.res.ColorStateList;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -26,6 +25,7 @@ import com.example.spotifyclone.adapter.AlbumAdapter;
 import com.example.spotifyclone.adapter.MediaCardAdapter;
 import com.example.spotifyclone.api.AlbumApiClient;
 import com.example.spotifyclone.api.PlaylistApiClient;
+import com.example.spotifyclone.customization.WallpaperStyle;
 import com.example.spotifyclone.model.Album;
 import com.example.spotifyclone.model.MediaItem;
 import com.example.spotifyclone.model.Page;
@@ -146,6 +146,9 @@ public class LibraryFragment extends Fragment {
         View buttonCreatePlaylist = view.findViewById(R.id.buttonCreatePlaylist);
 
         if (buttonCreatePlaylist != null) {
+            buttonCreatePlaylist.setBackgroundTintList(
+                    ColorStateList.valueOf(WallpaperStyle.BUTTON_ACTIVE_COLOR)
+            );
             buttonCreatePlaylist.setOnClickListener(
                     v -> showCreatePlaylistDialog()
             );
@@ -168,17 +171,17 @@ public class LibraryFragment extends Fragment {
 
         buttonFilterPlaylists.setBackgroundTintList(
                 ColorStateList.valueOf(
-                        Color.parseColor(
-                                showingPlaylists ? "#1DB954" : "#333333"
-                        )
+                        showingPlaylists
+                                ? WallpaperStyle.BUTTON_ACTIVE_COLOR
+                                : WallpaperStyle.BUTTON_INACTIVE_COLOR
                 )
         );
 
         buttonFilterAlbums.setBackgroundTintList(
                 ColorStateList.valueOf(
-                        Color.parseColor(
-                                showingPlaylists ? "#333333" : "#1DB954"
-                        )
+                        showingPlaylists
+                                ? WallpaperStyle.BUTTON_INACTIVE_COLOR
+                                : WallpaperStyle.BUTTON_ACTIVE_COLOR
                 )
         );
 

@@ -5,7 +5,7 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 
 public class SearchApiClient {
-    private static final OkHttpClient client = new OkHttpClient();
+    static OkHttpClient client = new OkHttpClient();
     private static final String BASE_URL = "https://api.spotify.com/v1";
 
     // Endpoint: Search for Item (GET /search)

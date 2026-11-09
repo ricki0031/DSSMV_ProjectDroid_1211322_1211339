@@ -7,7 +7,7 @@ import okhttp3.Request;
 
 public class TrackApiClient {
 
-    private static final OkHttpClient client = new OkHttpClient();
+    static OkHttpClient client = new OkHttpClient();
     private static final String BASE_URL = "https://api.spotify.com/v1";
 
 

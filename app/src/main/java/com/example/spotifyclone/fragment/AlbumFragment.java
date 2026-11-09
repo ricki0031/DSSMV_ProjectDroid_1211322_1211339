@@ -6,6 +6,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
@@ -64,11 +65,16 @@ public class AlbumFragment extends Fragment {
     private void loadAlbum() {
         AlbumApiClient.getAlbum(accessToken, albumId, new Callback() {
             @Override
-            public void onFailure(@NonNull Call call, @NonNull IOException e) {}
+            public void onFailure(@NonNull Call call, @NonNull IOException e) {
+                showLoadError("Não foi possível carregar o álbum");
+            }
 
             @Override
             public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
-                if (response.isSuccessful() && response.body() != null) {
+                if (!response.isSuccessful()) {
+                    showLoadError("Não foi possível carregar o álbum (" + response.code() + ")");
+                    response.close();
+                } else if (response.body() != null) {
                     String json = response.body().string();
                     com.google.gson.Gson gson = new com.google.gson.Gson();
                     Album album = gson.fromJson(json, Album.class);
@@ -127,5 +133,15 @@ public class AlbumFragment extends Fragment {
                 }
             }
         });
+    }
+
+    private void showLoadError(String message) {
+        if (getActivity() != null) {
+            getActivity().runOnUiThread(() -> {
+                if (isAdded()) {
+                    Toast.makeText(requireContext(), message, Toast.LENGTH_LONG).show();
+                }
+            });
+        }
     }
 }

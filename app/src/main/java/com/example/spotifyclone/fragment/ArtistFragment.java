@@ -117,6 +117,14 @@ public class ArtistFragment extends BaseFragment {
                             .into(imageArtist);
                 }
             }
+
+            @Override
+            protected void onError(int code, String body) {
+                super.onError(code, body);
+                if (alive()) {
+                    Toast.makeText(requireContext(), "Não foi possível carregar o artista (" + code + ")", Toast.LENGTH_LONG).show();
+                }
+            }
         });
     }
 

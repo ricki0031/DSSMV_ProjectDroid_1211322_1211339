@@ -42,13 +42,13 @@ public final class Session {
         return prefs(context).getLong(KEY_EXPIRES_AT, 0);
     }
 
+    /** Tempo que falta até o token precisar de ser renovado (negativo se já expirou). */
+    public static long millisUntilExpired(Context context) {
+        return getExpiresAt(context) - EXPIRY_MARGIN_MS - System.currentTimeMillis();
+    }
+
     public static boolean isExpired(Context context) {
-        long limit = getExpiresAt(context) - EXPIRY_MARGIN_MS;
-        if (System.currentTimeMillis() > limit) {
-            return true;
-        } else {
-            return false;
-        }
+        return millisUntilExpired(context) < 0;
     }
 
     public static boolean hasScopes(Context context, String requiredScopes) {

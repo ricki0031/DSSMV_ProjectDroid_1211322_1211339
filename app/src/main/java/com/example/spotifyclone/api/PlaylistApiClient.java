@@ -11,7 +11,7 @@ import okhttp3.Request;
 import okhttp3.RequestBody;
 
 public class PlaylistApiClient {
-    private static final OkHttpClient client = new OkHttpClient();
+    static OkHttpClient client = new OkHttpClient();
     private static final String BASE_URL = "https://api.spotify.com/v1";
 
     // Endpoint: Get Playlist (GET /playlists/{playlist_id})

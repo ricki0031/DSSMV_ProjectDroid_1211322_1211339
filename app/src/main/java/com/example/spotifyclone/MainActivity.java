@@ -19,11 +19,14 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.lifecycle.Lifecycle;
 
 import com.bumptech.glide.Glide;
 import com.example.spotifyclone.api.LibraryApiClient;
 import com.example.spotifyclone.api.PlayerApiClient;
 import com.example.spotifyclone.api.SpotifyAuthClient;
+import com.example.spotifyclone.customization.WallpaperStyle;
 import com.example.spotifyclone.fragment.AlbumFragment;
 import com.example.spotifyclone.fragment.ArtistFragment;
 import com.example.spotifyclone.fragment.HomeFragment;
@@ -70,6 +73,10 @@ public class MainActivity extends AppCompatActivity {
     private String globalAccessToken;
     public String globalDeviceId = "";
     private boolean navInitialized = false;
+    private boolean refreshingToken = false;
+
+    private final Handler tokenHandler = new Handler(Looper.getMainLooper());
+    private final Runnable scheduledTokenRefresh = () -> refreshToken(false);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -77,6 +84,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         applyStatusBarInset();
+        WallpaperStyle.apply(this);
         setupMiniPlayerControls();
 
         if (getIntent() != null && getIntent().getData() != null
@@ -134,8 +142,45 @@ public class MainActivity extends AppCompatActivity {
         authenticateWithSpotify();
     }
 
+    /** O token dura 1 hora: renova-o antes de expirar, enquanto a app está aberta. */
+    private void scheduleTokenRefresh() {
+        tokenHandler.removeCallbacks(scheduledTokenRefresh);
+        tokenHandler.postDelayed(scheduledTokenRefresh, Math.max(0, Session.millisUntilExpired(this)));
+    }
+
+    private void refreshToken(boolean reloadScreen) {
+        String refreshToken = Session.getRefreshToken(this);
+        if (refreshToken == null || refreshingToken) {
+            return;
+        }
+
+        refreshingToken = true;
+        SpotifyAuthClient.refreshAccessToken(BuildConfig.SPOTIFY_CLIENT_ID, refreshToken, new ApiCallback() {
+            @Override
+            protected void onSuccess(String body) {
+                refreshingToken = false;
+                Session.save(MainActivity.this, GSON.fromJson(body, TokenResponse.class));
+                scheduleTokenRefresh();
+
+                boolean resumed = getLifecycle().getCurrentState().isAtLeast(Lifecycle.State.RESUMED);
+                if (reloadScreen && resumed) {
+                    BottomNavigationView bottomNav = findViewById(R.id.bottom_navigation);
+                    bottomNav.setSelectedItemId(bottomNav.getSelectedItemId());
+                    syncMiniPlayer(Session.getAccessToken(MainActivity.this));
+                }
+            }
+
+            @Override
+            protected void onError(int code, String body) {
+                super.onError(code, body);
+                refreshingToken = false;
+            }
+        });
+    }
+
     private void onAuthenticated(String token) {
         this.globalAccessToken = token;
+        scheduleTokenRefresh();
         fetchActiveDevice(token);
 
         if (!navInitialized) {
@@ -256,6 +301,8 @@ public class MainActivity extends AppCompatActivity {
                 args.putString("ACCESS_TOKEN", Session.getAccessToken(this));
                 selectedFragment.setArguments(args);
 
+                // O histórico é por separador: voltar atrás nunca mostra páginas de outro separador
+                getSupportFragmentManager().popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
                 getSupportFragmentManager().beginTransaction()
                         .replace(R.id.fragment_container, selectedFragment)
                         .commit();
@@ -521,10 +568,25 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
+
+        if (Session.isExpired(this)) {
+            // No arranque, a renovação já foi pedida em restoreOrAuthenticate()
+            if (navInitialized) {
+                refreshToken(true);
+            }
+            return;
+        }
+
         String token = Session.getAccessToken(this);
         if (token != null) {
             syncMiniPlayer(token);
         }
+    }
+
+    @Override
+    protected void onDestroy() {
+        tokenHandler.removeCallbacks(scheduledTokenRefresh);
+        super.onDestroy();
     }
 private boolean hasInternetConnection() {
     ConnectivityManager manager =

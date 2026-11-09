@@ -6,7 +6,7 @@ import okhttp3.Request;
 
 public class AlbumApiClient {
     // Mantemos o client e a BASE_URL aqui para esta classe gerir os seus próprios pedidos
-    private static final OkHttpClient client = new OkHttpClient();
+    static OkHttpClient client = new OkHttpClient();
     private static final String BASE_URL = "https://api.spotify.com/v1";
 
     public static void getAlbum(String accessToken, String albumId, Callback callback) {

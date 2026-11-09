@@ -9,7 +9,7 @@ import okhttp3.RequestBody;
 
 public class SpotifyAuthClient {
     // O cliente HTTP que vai gerir as ligações
-    private static final OkHttpClient client = new OkHttpClient();
+    static OkHttpClient client = new OkHttpClient();
 
     /**
      * PASSO 4: Trocar o código PKCE pelo Access Token.

@@ -9,7 +9,7 @@ import okhttp3.Request;
 import okhttp3.RequestBody;
 
 public class LibraryApiClient {
-    private static final OkHttpClient client = new OkHttpClient();
+    static OkHttpClient client = new OkHttpClient();
     private static final String BASE_URL = "https://api.spotify.com/v1";
 
     // Endpoint (Secção Library): Save Items to Library (PUT /me/library?uris=...)

@@ -35,10 +35,9 @@ import com.google.gson.reflect.TypeToken;
 import java.io.IOException;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -51,10 +50,11 @@ public class HomeFragment extends BaseFragment {
 
     // A grelha tem 8 posições: Músicas favoritas + 7 álbuns/artistas
     private static final int GRID_MEDIA_ITEMS = 7;
-    private static final int MAX_RECENT_ARTISTS = 8;
 
     private List<MediaItem> savedAlbums = new ArrayList<>();
     private List<MediaItem> topArtists = new ArrayList<>();
+    private List<MediaItem> userPlaylists = new ArrayList<>();
+    private List<RecentlyPlayedResponse.TrackItem> recentTracks = new ArrayList<>();
 
     private RecyclerView recyclerViewGrid;
     private RecyclerView recyclerViewRecommended;
@@ -196,13 +196,14 @@ public class HomeFragment extends BaseFragment {
 
                 topArtists = artists;
                 showQuickAccess();
+                showRecents();
             }
         });
     }
 
-    /** Preenche a grelha e o "Voltar a ouvir" com álbuns e artistas alternados. */
+    /** Preenche a grelha e o "Voltar a ouvir" com álbuns, artistas e playlists alternados. */
     private void showQuickAccess() {
-        List<MediaItem> mixed = interleave(savedAlbums, topArtists);
+        List<MediaItem> mixed = interleave(Arrays.asList(savedAlbums, topArtists, userPlaylists));
 
         List<MediaItem> gridItems = new ArrayList<>();
         gridItems.add(MediaItem.likedSongs());
@@ -221,16 +222,18 @@ public class HomeFragment extends BaseFragment {
         );
     }
 
-    private List<MediaItem> interleave(List<MediaItem> first, List<MediaItem> second) {
-        List<MediaItem> result = new ArrayList<>();
-        int longest = Math.max(first.size(), second.size());
+    private List<MediaItem> interleave(List<List<MediaItem>> lists) {
+        int longest = 0;
+        for (List<MediaItem> list : lists) {
+            longest = Math.max(longest, list.size());
+        }
 
+        List<MediaItem> result = new ArrayList<>();
         for (int i = 0; i < longest; i++) {
-            if (i < first.size()) {
-                result.add(first.get(i));
-            }
-            if (i < second.size()) {
-                result.add(second.get(i));
+            for (List<MediaItem> list : lists) {
+                if (i < list.size()) {
+                    result.add(list.get(i));
+                }
             }
         }
 
@@ -285,6 +288,9 @@ public class HomeFragment extends BaseFragment {
                             }
 
                             runOnUiThread(() -> {
+                                userPlaylists = items;
+                                showQuickAccess();
+
                                 recyclerViewRecommended.setAdapter(
                                         new MediaCardAdapter(
                                                 items,
@@ -371,57 +377,13 @@ public class HomeFragment extends BaseFragment {
                             }
 
                             runOnUiThread(() -> {
-                                showRecents(tracks, Collections.emptyMap());
-                                fetchRecentArtists(token, tracks);
+                                recentTracks = tracks;
+                                showRecents();
                             });
                         }
                     }
                 }
         );
-    }
-
-    /** O histórico só traz o nome dos artistas: as imagens têm de ser pedidas uma a uma. */
-    private void fetchRecentArtists(
-            String token,
-            List<RecentlyPlayedResponse.TrackItem> tracks
-    ) {
-        Set<String> artistIds = new LinkedHashSet<>();
-
-        for (RecentlyPlayedResponse.TrackItem track : tracks) {
-            String artistId = primaryArtistId(track);
-            if (artistId != null && artistIds.size() < MAX_RECENT_ARTISTS) {
-                artistIds.add(artistId);
-            }
-        }
-
-        Map<String, Artist> artistsById = new HashMap<>();
-        int[] pending = {artistIds.size()};
-
-        for (String artistId : artistIds) {
-            ArtistApiClient.getArtist(token, artistId, new ApiCallback() {
-                @Override
-                protected void onSuccess(String body) {
-                    Artist artist = GSON.fromJson(body, Artist.class);
-                    if (artist != null && artist.id != null) {
-                        artistsById.put(artist.id, artist);
-                    }
-                    onArtistFinished();
-                }
-
-                @Override
-                protected void onError(int code, String body) {
-                    super.onError(code, body);
-                    onArtistFinished();
-                }
-
-                private void onArtistFinished() {
-                    pending[0]--;
-                    if (pending[0] == 0 && alive()) {
-                        showRecents(tracks, artistsById);
-                    }
-                }
-            });
-        }
     }
 
     private String primaryArtistId(RecentlyPlayedResponse.TrackItem track) {
@@ -431,23 +393,28 @@ public class HomeFragment extends BaseFragment {
         return track.artists.get(0).id;
     }
 
-    /** Mostra álbuns e artistas pela ordem em que foram ouvidos, sem repetir. */
-    private void showRecents(
-            List<RecentlyPlayedResponse.TrackItem> tracks,
-            Map<String, Artist> artistsById
-    ) {
+    /**
+     * Mostra álbuns e artistas pela ordem em que foram ouvidos, sem repetir.
+     * O histórico não traz imagens de artistas, por isso só entram os que vieram no top de artistas.
+     */
+    private void showRecents() {
+        Map<String, MediaItem> artistsById = new HashMap<>();
+        for (MediaItem artist : topArtists) {
+            artistsById.put(artist.id, artist);
+        }
+
         List<MediaItem> items = new ArrayList<>();
         Set<String> seenIds = new HashSet<>();
 
-        for (RecentlyPlayedResponse.TrackItem track : tracks) {
+        for (RecentlyPlayedResponse.TrackItem track : recentTracks) {
             Album album = track.album;
             if (album != null && album.id != null && seenIds.add(album.id)) {
                 items.add(MediaItem.fromAlbum(album));
             }
 
-            Artist artist = artistsById.get(primaryArtistId(track));
+            MediaItem artist = artistsById.get(primaryArtistId(track));
             if (artist != null && seenIds.add(artist.id)) {
-                items.add(MediaItem.fromArtist(artist));
+                items.add(artist);
             }
         }
 

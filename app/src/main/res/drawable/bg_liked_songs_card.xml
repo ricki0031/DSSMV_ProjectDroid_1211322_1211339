@@ -2,10 +2,12 @@
 <shape xmlns:android="http://schemas.android.com/apk/res/android"
        android:shape="rectangle">
 
+    <!-- As mesmas cores do ícone bg_liked_songs -->
     <gradient
-            android:angle="0"
-            android:startColor="#51369A"
-            android:endColor="#30204F"
+            android:angle="315"
+            android:startColor="#4405F4"
+            android:centerColor="#8A80E6"
+            android:endColor="#BDE6D9"
             android:type="linear" />
 
     <corners android:radius="14dp" />

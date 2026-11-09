@@ -7,6 +7,20 @@
         android:layout_height="match_parent"
         android:background="#121212">
 
+    <!-- Wallpaper por trás de toda a app -->
+    <ImageView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:importantForAccessibility="no"
+            android:scaleType="centerCrop"
+            android:src="@drawable/wallpaper_vinyl" />
+
+    <!-- Escurece o wallpaper para o texto continuar legível -->
+    <View
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="#59000000" />
+
     <!-- Contentor dos fragmentos -->
     <FrameLayout
             android:id="@+id/fragment_container"
@@ -104,7 +118,6 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_alignParentBottom="true"
-            android:background="#000000"
             app:itemIconTint="#FFFFFF"
             app:itemTextColor="#FFFFFF"
             app:menu="@menu/bottom_nav_menu" />

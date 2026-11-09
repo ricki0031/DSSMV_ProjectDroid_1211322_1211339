@@ -10,7 +10,7 @@ import java.util.List;
 
 
 public class PlayerApiClient {
-    private static final OkHttpClient client = new OkHttpClient();
+    static OkHttpClient client = new OkHttpClient();
     private static final String BASE_URL = "https://api.spotify.com/v1";
 
     public static void getPlaybackState(String accessToken, Callback callback) {

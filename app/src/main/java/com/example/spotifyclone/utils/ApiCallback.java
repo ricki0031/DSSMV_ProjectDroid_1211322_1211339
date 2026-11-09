@@ -34,6 +34,10 @@ public abstract class ApiCallback implements Callback {
         int code = response.code();
         String body = "";
 
+        if (code == 429) {
+            Log.w(TAG, "Limite do Spotify atingido. Retry-After (s): " + response.header("Retry-After"));
+        }
+
         try (ResponseBody responseBody = response.body()) {
             if (responseBody != null) {
                 body = responseBody.string();
