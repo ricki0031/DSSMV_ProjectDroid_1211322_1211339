@@ -13,7 +13,7 @@ Activity -> Player: getTheUserQueue(token, callback)
 Player -> Spotify: GET /me/player/queue
 Spotify --> Activity: QueueResponse
 Activity -> Activity: hide repeated current track, keep up to 5 tracks
-Activity --> User: show "Next in queue"
+Activity --> User: show "A seguir na fila"
 
 User -> Activity: choose "Adicionar à Fila"
 Activity -> Player: addItemToPlaybackQueue(token, trackUri, callback)
@@ -25,7 +25,7 @@ alt success
     Activity -> Player: getTheUserQueue(token, callback)
     Player -> Spotify: GET /me/player/queue
     Spotify --> Activity: updated queue
-    Activity --> User: update "Next in queue"
+    Activity --> User: update "A seguir na fila"
 else error
     Spotify --> Activity: error code
     Activity --> User: show "Não foi possível adicionar à fila"
